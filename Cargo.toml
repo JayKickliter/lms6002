@@ -1,0 +1,8 @@
+[package]
+name = "lms6002"
+version = "0.1.0"
+authors = ["Jay Kickliter <jay@kickliter.com>"]
+readme = "README.md"
+
+[dependencies]
+bitfield = "0.13.0"
