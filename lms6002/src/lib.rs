@@ -1,10 +1,10 @@
 #[macro_use]
-extern crate bitfield;
+extern crate tock_registers;
 
 mod error;
 mod interface;
 mod lms6002;
-mod regs;
+pub mod regs;
 
 pub use error::*;
 pub use interface::*;
