@@ -49,7 +49,7 @@ impl<I: Interface> LMS6002<I> {
             Ok(_) => {
                 trace!("Wrote 0x{:02x} to 0x{:02x}", val, addr);
                 Ok(())
-            },
+            }
             Err(_) => {
                 error!("Failed to write to LMS register at 0x{:02x}", addr);
                 Err(Error::IO)
@@ -69,6 +69,19 @@ impl<I: Interface> LMS6002<I> {
     pub fn write_reg<T: LmsReg>(&self, reg: T) -> Result<()> {
         debug!("Writing {:?} to {}", reg, T::addr());
         self.write(T::addr(), reg.into())?;
+        Ok(())
+    }
+
+    /// Performs the read-modify-write operation `op` on a single LMS6002 register.
+    pub fn rmw_reg<T, F>(&self, op: F) -> Result<()>
+    where
+        T: LmsReg,
+        F: FnOnce(T) -> T,
+    {
+        trace!("Performing RMW on LMS register at 0x{:02x}", T::addr());
+        let r: T = self.read_reg()?;
+        let m = op(r);
+        self.write_reg(m)?;
         Ok(())
     }
 
