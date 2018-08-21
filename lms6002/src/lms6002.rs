@@ -82,4 +82,25 @@ impl<I: Interface> LMS6002<I> {
     pub fn new(iface: I, clk: u32) -> Self {
         Self { iface, clk }
     }
+
+    /// Consumes `self` and returns the inner interface.
+    pub fn into_inner(self) -> I {
+        self.iface
+    }
+
+    /// Performs operation `op` on the interface.
+    pub fn with_inner<F, R>(&self, op: F) -> R
+    where
+        F: FnOnce(&I) -> R,
+    {
+        op(&self.iface)
+    }
+
+    /// Performs mutable operation `op` on the interface.
+    pub fn with_inner_mut<F, R>(&mut self, op: F) -> R
+    where
+        F: FnOnce(&mut I) -> R,
+    {
+        op(&mut self.iface)
+    }
 }
