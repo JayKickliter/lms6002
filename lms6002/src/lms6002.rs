@@ -1,6 +1,6 @@
 use error::Error;
 use interface::Interface;
-use regs::*;
+use reg;
 
 /// The result type returned by `LMS6002` methods.
 pub type Result<T> = ::std::result::Result<T, Error>;
@@ -58,7 +58,7 @@ impl<I: Interface> LMS6002<I> {
     }
 
     /// Reads a single LMS6002 register.
-    pub fn read_reg<T: LmsReg>(&self) -> Result<T> {
+    pub fn read_reg<T: reg::LmsReg>(&self) -> Result<T> {
         let addr = T::addr();
         let reg = self.read(addr)?.into();
         debug!("Read {:?} from 0x{:02x}", reg, addr);
@@ -66,7 +66,7 @@ impl<I: Interface> LMS6002<I> {
     }
 
     /// Writes a single LMS6002 register.
-    pub fn write_reg<T: LmsReg>(&self, reg: T) -> Result<()> {
+    pub fn write_reg<T: reg::LmsReg>(&self, reg: T) -> Result<()> {
         debug!("Writing {:?} to {}", reg, T::addr());
         self.write(T::addr(), reg.into())?;
         Ok(())
@@ -75,7 +75,7 @@ impl<I: Interface> LMS6002<I> {
     /// Performs the read-modify-write operation `op` on a single LMS6002 register.
     pub fn rmw_reg<T, F>(&self, op: F) -> Result<()>
     where
-        T: LmsReg,
+        T: reg::LmsReg,
         F: FnOnce(T) -> T,
     {
         trace!("Performing RMW on LMS register at 0x{:02x}", T::addr());

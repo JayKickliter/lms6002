@@ -7,7 +7,7 @@ extern crate log;
 mod error;
 mod interface;
 mod lms6002;
-pub mod regs;
+pub mod reg;
 
 pub use error::*;
 pub use interface::*;
