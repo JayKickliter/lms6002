@@ -27,6 +27,27 @@ pub trait LmsReg: Debug + From<u8> + Into<u8> {
     }
 }
 
+macro_rules! lmsreg {
+    // lmsreg!(Top00, 0);
+    ( $reg:tt, $offset:expr ) => {
+        impl ::std::convert::From<u8> for $reg {
+            fn from(val: u8) -> $reg {
+                $reg(val)
+            }
+        }
+
+        impl ::std::convert::From<$reg> for u8 {
+            fn from(val: $reg) -> u8 {
+                val.0
+            }
+        }
+
+        impl LmsReg for $reg {
+            const OFFSET: u8 = $offset;
+        }
+    };
+}
+
 bitfield!{
     pub struct Top00(u8);
     impl Debug;
@@ -34,6 +55,7 @@ bitfield!{
     /// Value from DC calibration module selected by `DC_ADDR`.
     pub dc_regval, _: 5, 0;
 }
+lmsreg!(Top00, 0);
 
 bitfield!{
     pub struct Top01(u8);
@@ -62,6 +84,7 @@ bitfield!{
     /// - 0: Count Down.
     pub dc_ud, _: 0;
 }
+lmsreg!(Top01, 01);
 
 bitfield!{
     pub struct Top02(u8);
@@ -70,6 +93,7 @@ bitfield!{
     /// Value to load into selected (by `DC_ADDR`) DC calibration module.
     pub dc_cntval, set_dc_cntval: 5, 0;
 }
+lmsreg!(Top02, 02);
 
 bitfield!{
     pub struct Top03(u8);
@@ -96,6 +120,7 @@ bitfield!{
     /// - 001...111: Not used
     pub dc_addr, set_dc_addr: 2, 0;
 }
+lmsreg!(Top03, 03);
 
 bitfield!{
     pub struct Top04(u8);
@@ -107,6 +132,7 @@ bitfield!{
     /// Chip revision.
     pub rev, _: 3, 0;
 }
+lmsreg!(Top04, 04);
 
 bitfield!{
     pub struct Top05(u8);
@@ -141,6 +167,7 @@ bitfield!{
     // - 1: four wire mode (default)
     pub tfwmode, set_tfwmode: 1;
 }
+lmsreg!(Top05, 05);
 
 bitfield!{
     pub struct Top06(u8);
@@ -168,6 +195,7 @@ bitfield!{
     /// - 1: reset state (default)
     pub rst_cal_lpfcal, set_rst_cal_lpfcal: 0;
 }
+lmsreg!(Top06, 06);
 
 bitfield!{
     pub struct Top07(u8);
@@ -208,6 +236,7 @@ bitfield!{
     /// | 1111 |  0.75           |
     pub bwc_lpfcal, set_bwc_lpfcal: 3, 0;
 }
+lmsreg!(Top07, 07);
 
 bitfield!{
     pub struct Top08(u8);
@@ -238,6 +267,7 @@ bitfield!{
     /// - 4-15: Reserved. Not valid for settings.
     pub lbrfen, set_lbrfen: 3, 0;
 }
+lmsreg!(Top08, 08);
 
 bitfield!{
     pub struct Top09(u8);
@@ -255,7 +285,6 @@ bitfield!{
     /// - 1: LPF CAL clock enabled
     /// - 0: LPF CAL clock disabled (default)
     pub lpf_cal_clk_en, set_lpf_cal_clk_en: 5;
-
 
     /// - 1: Rx VGA2 DCCAL clock enabled
     /// - 0: Rx VGA2 DCCAL clock disabled (default)
@@ -277,6 +306,7 @@ bitfield!{
     /// - 0: Tx DSM SPI clock disabled (default)
     pub tx_dsm_spi_clk_en, set_tx_dsm_spi_clk_en: 0;
 }
+lmsreg!(Top09, 09);
 
 bitfield!{
     pub struct Top10(u8);
@@ -292,6 +322,7 @@ bitfield!{
     /// - 1: TDD Receive mode
     pub tddmod, set_tddmod: 0;
 }
+lmsreg!(Top10, 10);
 
 bitfield!{
     pub struct Top11(u8);
@@ -320,6 +351,7 @@ bitfield!{
     /// - 0: RF loop back switch powered down (default)
     pub pu_rf_lbs, set_pu_rf_lbs: 0;
 }
+lmsreg!(Top11, 11);
 
 bitfield!{
     pub struct Pll00(u8);
