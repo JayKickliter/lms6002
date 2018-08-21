@@ -17,8 +17,8 @@
 //! | `x110:xxxx`      | RX VGA2 configuration                 |
 //! | `x111:xxxx`      | RX FE modules configuration           |
 
-use std::fmt::Debug;
 use std::convert::{From, Into};
+use std::fmt::Debug;
 
 pub trait LmsReg: Debug + From<u8> + Into<u8> {
     const OFFSET: u8;
@@ -169,39 +169,157 @@ bitfield!{
     pub rst_cal_lpfcal, set_rst_cal_lpfcal: 0;
 }
 
-// bitfield!{
-//     pub struct Top0(u8);
-//     impl Debug;
-// }
-// bitfield!{
-//     pub struct Top0(u8);
-//     impl Debug;
-// }
-// bitfield!{
-//     pub struct Top0(u8);
-//     impl Debug;
-// }
-// bitfield!{
-//     pub struct Top0(u8);
-//     impl Debug;
-// }
-// bitfield!{
-//     pub struct Top0(u8);
-//     impl Debug;
-// }
-// bitfield!{
-//     pub struct Top0(u8);
-//     impl Debug;
-// }
-// bitfield!{
-//     pub struct Top0(u8);
-//     impl Debug;
-// }
-// bitfield!{
-//     pub struct Top0(u8);
-//     impl Debug;
-// }
+bitfield!{
+    pub struct Top07(u8);
+    impl Debug;
 
+    /// Enable signal.
+    ///
+    /// Should be enabled only during the RC calibration algorithm running.
+    /// - 0: Block disabled (default)
+    /// - 1: Block enabled
+    pub en_cal_lpfcal, set_en_cal_lpfcal: 7;
+
+    /// Input code coming from software.
+    ///
+    /// Will be passed to the output if `ENF_EN_CAL_LPFCAL=1`.
+    /// - 000 (default)
+    pub force_code_cal_lpfcal, set_force_code_cal_lpfcal: 6, 4;
+
+    /// LPF bandwidth control (Set this code to RXLPF BWC if RXLPF and TXLPF have different cut-off frequencies).
+    ///
+    /// | code | Bandwidth [MHz] |
+    /// |------|-----------------|
+    /// | 0000 |  14 (default)   |
+    /// | 0001 |  10             |
+    /// | 0010 |  7              |
+    /// | 0011 |  6              |
+    /// | 0100 |  5              |
+    /// | 0101 |  4.375          |
+    /// | 0110 |  3.5            |
+    /// | 0111 |  3              |
+    /// | 1000 |  2.75           |
+    /// | 1001 |  2.5            |
+    /// | 1010 |  1.92           |
+    /// | 1011 |  1.5            |
+    /// | 1100 |  1.375          |
+    /// | 1101 |  1.25           |
+    /// | 1110 |  0.875          |
+    /// | 1111 |  0.75           |
+    pub bwc_lpfcal, set_bwc_lpfcal: 3, 0;
+}
+
+bitfield!{
+    pub struct Top08(u8);
+    impl Debug;
+
+    /// BB loopback enable.
+    /// - 1: TX BB loopback signal is connected to RXLPF input. If enabled, RXTIA should be disabled (powered down)
+    /// - 0: default value
+    pub lben_lpfin, set_lben_lpfin: 6;
+
+    /// BB loopback enable.
+    /// - 1: TX BB loopback signal is connected to RXVGA2 input. If enabled, LPF should be disabled (powered down).
+    /// - 0: default value.
+    pub lben_vga2in, set_lben_vga2in: 5;
+
+    /// BB loopback enable.
+    /// - 1: TX BB loopback signal is connected to the RX output pins. If enabled, RXLPF and RXVGA2 should be disabled (powered down)
+    /// - 0: default value.
+    pub lben_opin, set_lben_opin: 4;
+
+    /// RF loop back control.
+    ///
+    /// When activated, LNAs should be disabled (powered down).
+    /// - 0:    RF loopback disabled (default)
+    /// - 1:    TXMIX output connected to LNA1 path
+    /// - 2:    TXMIX output connected to LNA2 path
+    /// - 3:    TXMIX output connected to LNA3 path
+    /// - 4-15: Reserved. Not valid for settings.
+    pub lbrfen, set_lbrfen: 3, 0;
+}
+
+bitfield!{
+    pub struct Top09(u8);
+    impl Debug;
+
+    // RX out/ADC in high-Z switch control
+    // - 0: switch open (RX output/ADC input chip pins disconnected) (default)
+    // - 1: switch closed, RXVGA2 should be powered off first
+    pub rxoutsw, set_rxoutsw: 7;
+
+    /// - 1 PLLCLKOUT enabled (default)
+    /// - 0 PLLCLKOUT disabled
+    pub pllclkout_en, set_pllclkout_en: 6;
+
+    /// - 1: LPF CAL clock enabled
+    /// - 0: LPF CAL clock disabled (default)
+    pub lpf_cal_clk_en, set_lpf_cal_clk_en: 5;
+
+
+    /// - 1: Rx VGA2 DCCAL clock enabled
+    /// - 0: Rx VGA2 DCCAL clock disabled (default)
+    pub rx_vga2_dccal_en, set_rx_vga2_dccal_en: 4;
+
+    /// - 1: Rx LPF DCCAL clock enabled
+    /// - 0: Rx LPF DCCAL clock disabled (default)
+    pub rx_lpf_dccal_clk_en, set_rx_lpf_dccal_clk_en: 3;
+
+    /// - 1: Rx DSM SPI clock enabled
+    /// - 0: Rx DSM SPI clock disabled (default)
+    pub rx_dsm_spi_clk_en, set_rx_dsm_spi_clk_en: 2;
+
+    /// - 1: Tx LPF SPI DCCAL clock enabled
+    /// - 0: Tx LPF SPI DCCAL clock disabled (default)
+    pub tx_lpf_spi_dccal_clk_en, set_tx_lpf_spi_dccal_clk_en: 1;
+
+    /// - 1: Tx DSM SPI clock enabled
+    /// - 0: Tx DSM SPI clock disabled (default)
+    pub tx_dsm_spi_clk_en, set_tx_dsm_spi_clk_en: 0;
+}
+
+bitfield!{
+    pub struct Top10(u8);
+    impl Debug;
+
+    /// Frequency/Time division duplexing selection
+    /// - 0: FDD mode (default)
+    /// - 1: TDD mode
+    pub fddtdd, set_fddtdd: 1;
+
+    /// TDD mode selection if FDDTDD=1
+    /// - 0: TDD Transmit mode (default)
+    /// - 1: TDD Receive mode
+    pub tddmod, set_tddmod: 0;
+}
+
+bitfield!{
+    pub struct Top11(u8);
+    impl Debug;
+
+    /// XCO buffer power down
+    /// - 0: buffer powered up (default)
+    /// - 1: buffer powered down
+    pub pdxcobuf, set_pdxcobuf: 4;
+
+    /// XCO buffer self-biasing control
+    /// - 0: self biasing disabled
+    /// - 1: self biasing enabled (default)
+    pub slfbxcobuf, set_slfbxcobuf: 3;
+
+    /// XCO buffer bypass
+    /// - 0: buffer active (default)
+    /// - 1: buffer bypassed
+    pub bypxcobuf, set_bypxcobuf: 2;
+
+    /// - 1: PD_DCOREF_LPFCAL powered down
+    /// - 0: PD_DCOREF_LPFCAL powered up (default)
+    pub pd_dcoref_lpfcal, set_pd_dcoref_lpfcal: 1;
+
+    /// - 1: RF loop back switch powered up
+    /// - 0: RF loop back switch powered down (default)
+    pub pu_rf_lbs, set_pu_rf_lbs: 0;
+}
 
 bitfield!{
     pub struct Pll00(u8);
@@ -416,7 +534,6 @@ bitfield!{
     /// - 1: disabled (powered down)
     pub pd_vcocomp_sx, set_pd_vcocomp_sx: 3;
 }
-
 
 #[cfg(test)]
 mod tests {
