@@ -1,5 +1,6 @@
 use error::Error;
 use interface::Interface;
+use regs::*;
 
 /// The result type returned by `LMS6002` methods.
 pub type Result<T> = ::std::result::Result<T, Error>;
@@ -30,18 +31,45 @@ pub enum Path {
 }
 
 impl<I: Interface> LMS6002<I> {
-    fn read(&self, addr: u8) -> Result<u8> {
+    pub fn read(&self, addr: u8) -> Result<u8> {
         match self.iface.read(addr) {
-            Ok(val) => Ok(val),
-            Err(_) => Err(Error::IO),
+            Ok(val) => {
+                trace!("Read 0x{:02x} from 0x{:02x}", val, addr);
+                Ok(val)
+            }
+            Err(_) => {
+                error!("Failed to read LMS register at 0x{:02x}", addr);
+                Err(Error::IO)
+            }
         }
     }
 
-    fn write(&self, addr: u8, val: u8) -> Result<()> {
+    pub fn write(&self, addr: u8, val: u8) -> Result<()> {
         match self.iface.write(addr, val) {
-            Ok(_) => Ok(()),
-            Err(_) => Err(Error::IO),
+            Ok(_) => {
+                trace!("Wrote 0x{:02x} to 0x{:02x}", val, addr);
+                Ok(())
+            },
+            Err(_) => {
+                error!("Failed to write to LMS register at 0x{:02x}", addr);
+                Err(Error::IO)
+            }
         }
+    }
+
+    /// Reads a single LMS6002 register.
+    pub fn read_reg<T: LmsReg>(&self) -> Result<T> {
+        let addr = T::addr();
+        let reg = self.read(addr)?.into();
+        debug!("Read {:?} from 0x{:02x}", reg, addr);
+        Ok(reg)
+    }
+
+    /// Writes a single LMS6002 register.
+    pub fn write_reg<T: LmsReg>(&self, reg: T) -> Result<()> {
+        debug!("Writing {:?} to {}", reg, T::addr());
+        self.write(T::addr(), reg.into())?;
+        Ok(())
     }
 
     /// Returns a new `LMS6002`.
