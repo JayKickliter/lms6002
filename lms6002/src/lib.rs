@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate tock_registers;
 
+#[macro_use]
+extern crate log;
+
 mod error;
 mod interface;
 mod lms6002;
