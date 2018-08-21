@@ -17,7 +17,10 @@
 //! | `x110:xxxx`      | RX VGA2 configuration                 |
 //! | `x111:xxxx`      | RX FE modules configuration           |
 
-pub trait LmsReg: ::std::fmt::Debug {
+use std::fmt::Debug;
+use std::convert::{From, Into};
+
+pub trait LmsReg: Debug + From<u8> + Into<u8> {
     const OFFSET: u8;
     fn addr() -> u8 {
         Self::OFFSET
