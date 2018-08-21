@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate tock_registers;
+extern crate bitfield;
 
 #[macro_use]
 extern crate log;

@@ -5,5 +5,5 @@ authors = ["Jay Kickliter <jay@kickliter.com>"]
 readme = "README.md"
 
 [dependencies]
-tock-registers = "0.1.0"
+bitfield = "0.13.0"
 log = "0.4.4"
