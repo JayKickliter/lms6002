@@ -19,6 +19,7 @@
 
 use std::convert::{From, Into};
 use std::fmt::Debug;
+use std::marker::PhantomData;
 
 pub trait LmsReg: Debug + From<u8> + Into<u8> {
     fn addr() -> u8;
@@ -356,10 +357,61 @@ bitfield!{
 }
 lmsreg!(Top11, 11);
 
-
 ////////////////////////////////////////////////////////////////////////////
 // PLL Registers                                                          //
 ////////////////////////////////////////////////////////////////////////////
+
+/// A Represents either the TX or RX PLL modules.
+pub trait PllMod {
+    /// Absolute offset of module in LMS6002 address space.
+    const OFFSET: u8;
+}
+
+pub struct TxPll;
+impl PllMod for TxPll {
+    const OFFSET: u8 = 0x10;
+}
+
+pub struct RxPll;
+impl PllMod for RxPll {
+    const OFFSET: u8 = 0x20;
+}
+
+pub struct PllReg<R: Debug, M: PllMod>(pub R, PhantomData<M>);
+
+macro_rules! pllreg {
+    ( $reg:tt, $offset:expr ) => {
+        impl<M: PllMod> ::std::convert::AsRef<$reg> for PllReg<$reg, M> {
+            fn as_ref(&self) -> &$reg {
+                &self.0
+            }
+        }
+
+        impl<M: PllMod> ::std::convert::From<u8> for PllReg<$reg, M> {
+            fn from(val: u8) -> Self {
+                PllReg($reg(val), PhantomData)
+            }
+        }
+
+        impl<M: PllMod> ::std::convert::From<PllReg<$reg, M>> for u8 {
+            fn from(val: PllReg<$reg, M>) -> Self {
+                (val.0).0
+            }
+        }
+
+        impl<M: PllMod> Debug for PllReg<$reg, M> {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
+                self.0.fmt(f)
+            }
+        }
+
+        impl<M: PllMod> LmsReg for PllReg<$reg, M> {
+            fn addr() -> u8 {
+                M::OFFSET + $offset
+            }
+        }
+    }
+}
 
 bitfield!{
     pub struct Pll00(u8);
@@ -368,6 +420,7 @@ bitfield!{
     /// Integer part of the divider (MSBs)
     pub nint_8_1, set_nint_8_1: 7, 0;
 }
+pllreg!(Pll00, 00);
 
 bitfield!{
     pub struct Pll01(u8);
@@ -379,6 +432,7 @@ bitfield!{
     /// Fractional part of the divider
     pub nfrac_22_16, set_nfrac_22_16: 6, 0;
 }
+pllreg!(Pll01, 01);
 
 bitfield!{
     pub struct Pll02(u8);
@@ -387,6 +441,7 @@ bitfield!{
     /// Fractional part of the divider
     pub nfrac_15_8, set_nfrac_15_8: 7, 0;
 }
+pllreg!(Pll02, 02);
 
 bitfield!{
     pub struct Pll03(u8);
@@ -395,6 +450,7 @@ bitfield!{
     /// Fractional part of the divider
     pub nfrac_7_0, set_nfrac_7_0: 7, 0;
 }
+pllreg!(Pll03, 03);
 
 bitfield!{
     pub struct Pll04(u8);
@@ -428,6 +484,7 @@ bitfield!{
     /// - 1: use power down/enable signals from test mode registers
     pub decode, set_decode: 1;
 }
+pllreg!(Pll04, 04);
 
 bitfield!{
     pub struct Pll05(u8);
@@ -455,6 +512,7 @@ bitfield!{
     /// - 11: Third buffer enabled for LNA3 path
     pub selout, set_selout: 1, 0;
 }
+pllreg!(Pll05, 05);
 
 bitfield!{
     pub struct Pll06(u8);
@@ -482,6 +540,7 @@ bitfield!{
     /// - 2400 uA
     pub ichp, set_ichp: 4, 0;
 }
+pllreg!(Pll06, 06);
 
 bitfield!{
     pub struct Pll07(u8);
@@ -513,6 +572,8 @@ bitfield!{
     /// - ...: 240uA
     pub offup, set_offup: 5, 0;
 }
+pllreg!(Pll07, 07);
+
 
 bitfield!{
     pub struct Pll08(u8);
@@ -520,7 +581,7 @@ bitfield!{
 
     /// VCO regulator output voltage control, 3 MSBs.
     ///
-    /// LSB=100mV, VOVCOREG{3:0} coded as below
+    /// LSB=100mV, VOVCOREG[3:0] coded as below
     /// - 0000: 1.4V, min output
     /// - ...
     /// - 0101: 1.9V (default)
@@ -539,6 +600,7 @@ bitfield!{
     /// - ...: 240uA
     pub offdown, set_offdown: 4, 0;
 }
+pllreg!(Pll08, 08);
 
 bitfield!{
     pub struct Pll09(u8);
@@ -553,6 +615,7 @@ bitfield!{
     /// - 111111 (min capacitance, max frequency)
     pub vcocap, set_vcocap: 5, 0;
 }
+pllreg!(Pll09, 09);
 
 bitfield!{
     pub struct Pll10(u8);
@@ -564,6 +627,7 @@ bitfield!{
     /// Value from Vtune comparator (Read Only)
     pub vtune_l, _: 6;
 }
+pllreg!(Pll10, 10);
 
 bitfield!{
     pub struct Pll11(u8);
@@ -574,6 +638,7 @@ bitfield!{
     /// - 1: disabled (powered down)
     pub pd_vcocomp_sx, set_pd_vcocomp_sx: 3;
 }
+pllreg!(Pll11, 11);
 
 #[cfg(test)]
 mod tests {
