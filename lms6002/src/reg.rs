@@ -21,10 +21,7 @@ use std::convert::{From, Into};
 use std::fmt::Debug;
 
 pub trait LmsReg: Debug + From<u8> + Into<u8> {
-    const OFFSET: u8;
-    fn addr() -> u8 {
-        Self::OFFSET
-    }
+    fn addr() -> u8;
 }
 
 macro_rules! lmsreg {
@@ -43,11 +40,12 @@ macro_rules! lmsreg {
         }
 
         impl LmsReg for $reg {
-            const OFFSET: u8 = $offset;
+            fn addr() -> u8 {
+                $offset
+            }
         }
     };
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Top Level Registers                                                    //
