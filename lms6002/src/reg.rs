@@ -410,7 +410,7 @@ macro_rules! pllreg {
                 M::OFFSET + $offset
             }
         }
-    }
+    };
 }
 
 bitfield!{
@@ -574,7 +574,6 @@ bitfield!{
 }
 pllreg!(Pll07, 07);
 
-
 bitfield!{
     pub struct Pll08(u8);
     impl Debug;
@@ -640,14 +639,24 @@ bitfield!{
 }
 pllreg!(Pll11, 11);
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_debug() {
-        let mut reg = Pll04(0);
-        reg.set_dithen(true);
-        println!("{:#?}", reg);
+/// Returns a boxed `Debug` object from a register's `addr` and `val`
+/// pair.
+///
+/// This a weak form of up-casting.
+pub fn into_debug(addr: u8, val: u8) -> Box<Debug> {
+    match addr {
+        00 => Box::new(Top00(val)),
+        01 => Box::new(Top01(val)),
+        02 => Box::new(Top02(val)),
+        03 => Box::new(Top03(val)),
+        04 => Box::new(Top04(val)),
+        05 => Box::new(Top05(val)),
+        06 => Box::new(Top06(val)),
+        07 => Box::new(Top07(val)),
+        08 => Box::new(Top08(val)),
+        09 => Box::new(Top09(val)),
+        10 => Box::new(Top10(val)),
+        11 => Box::new(Top11(val)),
+        _ => Box::new((addr, val)),
     }
 }
