@@ -2,4 +2,5 @@
 
 members = [
     "lms6002",
+    "client",
 ]
