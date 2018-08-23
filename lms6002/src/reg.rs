@@ -21,7 +21,7 @@ use std::convert::{From, Into};
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
-pub trait LmsReg: Debug + From<u8> + Into<u8> {
+pub trait LmsReg: Debug + From<u8> + Into<u8> + Copy {
     fn addr() -> u8;
 }
 
@@ -53,6 +53,7 @@ macro_rules! lmsreg {
 ////////////////////////////////////////////////////////////////////////////
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x00(u8);
     impl Debug;
 
@@ -62,6 +63,7 @@ bitfield!{
 lmsreg!(Top0x00, 0x00);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x01(u8);
     impl Debug;
 
@@ -91,6 +93,7 @@ bitfield!{
 lmsreg!(Top0x01, 0x01);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x02(u8);
     impl Debug;
 
@@ -100,6 +103,7 @@ bitfield!{
 lmsreg!(Top0x02, 0x02);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x03(u8);
     impl Debug;
 
@@ -127,6 +131,7 @@ bitfield!{
 lmsreg!(Top0x03, 0x03);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x04(u8);
     impl Debug;
 
@@ -139,6 +144,7 @@ bitfield!{
 lmsreg!(Top0x04, 0x04);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x05(u8);
     impl Debug;
 
@@ -174,6 +180,7 @@ bitfield!{
 lmsreg!(Top0x05, 0x05);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x06(u8);
     impl Debug;
 
@@ -202,6 +209,7 @@ bitfield!{
 lmsreg!(Top0x06, 0x06);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x07(u8);
     impl Debug;
 
@@ -243,6 +251,7 @@ bitfield!{
 lmsreg!(Top0x07, 0x07);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x08(u8);
     impl Debug;
 
@@ -274,6 +283,7 @@ bitfield!{
 lmsreg!(Top0x08, 0x08);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x09(u8);
     impl Debug;
 
@@ -313,6 +323,7 @@ bitfield!{
 lmsreg!(Top0x09, 0x09);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x0A(u8);
     impl Debug;
 
@@ -329,6 +340,7 @@ bitfield!{
 lmsreg!(Top0x0A, 0x0A);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Top0x0B(u8);
     impl Debug;
 
@@ -362,22 +374,25 @@ lmsreg!(Top0x0B, 0x0B);
 ////////////////////////////////////////////////////////////////////////////
 
 /// A Represents either the TX or RX PLL modules.
-pub trait PllMod {
+pub trait PllMod: Copy {
     /// Absolute offset of module in LMS6002 address space.
     const OFFSET: u8;
 }
 
+#[derive(Clone, Copy)]
 pub struct TxPll;
 impl PllMod for TxPll {
     const OFFSET: u8 = 0x10;
 }
 
+#[derive(Clone, Copy)]
 pub struct RxPll;
 impl PllMod for RxPll {
     const OFFSET: u8 = 0x20;
 }
 
-pub struct PllReg<R: Debug, M: PllMod>(pub R, PhantomData<M>);
+#[derive(Clone, Copy)]
+pub struct PllReg<R: Debug + Copy, M: PllMod>(pub R, PhantomData<M>);
 
 macro_rules! pllreg {
     ( $reg:tt, $offset:expr ) => {
@@ -414,6 +429,7 @@ macro_rules! pllreg {
 }
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x00(u8);
     impl Debug;
 
@@ -423,6 +439,7 @@ bitfield!{
 pllreg!(Pll0x00, 0x00);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x01(u8);
     impl Debug;
 
@@ -435,6 +452,7 @@ bitfield!{
 pllreg!(Pll0x01, 0x01);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x02(u8);
     impl Debug;
 
@@ -444,6 +462,7 @@ bitfield!{
 pllreg!(Pll0x02, 0x02);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x03(u8);
     impl Debug;
 
@@ -453,6 +472,7 @@ bitfield!{
 pllreg!(Pll0x03, 0x03);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x04(u8);
     impl Debug;
 
@@ -487,6 +507,7 @@ bitfield!{
 pllreg!(Pll0x04, 0x04);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x05(u8);
     impl Debug;
 
@@ -515,6 +536,7 @@ bitfield!{
 pllreg!(Pll0x05, 0x05);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x06(u8);
     impl Debug;
 
@@ -543,6 +565,7 @@ bitfield!{
 pllreg!(Pll0x06, 0x06);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x07(u8);
     impl Debug;
 
@@ -575,6 +598,7 @@ bitfield!{
 pllreg!(Pll0x07, 0x07);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x08(u8);
     impl Debug;
 
@@ -602,6 +626,7 @@ bitfield!{
 pllreg!(Pll0x08, 0x08);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x09(u8);
     impl Debug;
 
@@ -617,6 +642,7 @@ bitfield!{
 pllreg!(Pll0x09, 0x09);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x0A(u8);
     impl Debug;
 
@@ -629,6 +655,7 @@ bitfield!{
 pllreg!(Pll0x0A, 0x0A);
 
 bitfield!{
+    #[derive(Clone, Copy)]
     pub struct Pll0x0B(u8);
     impl Debug;
 
@@ -639,12 +666,19 @@ bitfield!{
 }
 pllreg!(Pll0x0B, 0x0B);
 
+// Represents a reserved register.
+#[derive(Clone, Copy, Debug)]
+struct Reserved(u8);
+
 /// Returns a boxed `Debug` object from a register's `addr` and `val`
 /// pair.
 ///
 /// This a weak form of up-casting.
-pub fn into_debug(addr: u8, val: u8) -> Box<Debug> {
-    match addr {
+pub fn into_debug(addr: u8, val: u8) -> Result<Box<Debug>, ()> {
+    Ok(match addr {
+        ////////////////////////////////////////////////////////////////////
+        // Top-level                                                      //
+        ////////////////////////////////////////////////////////////////////
         0x00 => Box::new(Top0x00(val)),
         0x01 => Box::new(Top0x01(val)),
         0x02 => Box::new(Top0x02(val)),
@@ -657,6 +691,144 @@ pub fn into_debug(addr: u8, val: u8) -> Box<Debug> {
         0x09 => Box::new(Top0x09(val)),
         0x0A => Box::new(Top0x0A(val)),
         0x0B => Box::new(Top0x0B(val)),
-        _ => Box::new((addr, val)),
-    }
+        // 0x0C
+        // 0x0D
+        // 0x0E
+        // 0x0F
+        ////////////////////////////////////////////////////////////////////
+        // TX PLL                                                         //
+        ////////////////////////////////////////////////////////////////////
+        0x10 => Box::new(Pll0x00(val)),
+        0x11 => Box::new(Pll0x01(val)),
+        0x12 => Box::new(Pll0x02(val)),
+        0x13 => Box::new(Pll0x03(val)),
+        0x14 => Box::new(Pll0x04(val)),
+        0x15 => Box::new(Pll0x05(val)),
+        0x16 => Box::new(Pll0x06(val)),
+        0x17 => Box::new(Pll0x07(val)),
+        0x18 => Box::new(Pll0x08(val)),
+        0x19 => Box::new(Pll0x09(val)),
+        0x1A => Box::new(Pll0x0A(val)),
+        0x1B => Box::new(Pll0x0B(val)),
+        // 0x1C
+        // 0x1D
+        // 0x1E
+        // 0x1F
+        ////////////////////////////////////////////////////////////////////
+        // RX PLL                                                         //
+        ////////////////////////////////////////////////////////////////////
+        0x20 => Box::new(Pll0x00(val)),
+        0x21 => Box::new(Pll0x01(val)),
+        0x22 => Box::new(Pll0x02(val)),
+        0x23 => Box::new(Pll0x03(val)),
+        0x24 => Box::new(Pll0x04(val)),
+        0x25 => Box::new(Pll0x05(val)),
+        0x26 => Box::new(Pll0x06(val)),
+        0x27 => Box::new(Pll0x07(val)),
+        0x28 => Box::new(Pll0x08(val)),
+        0x29 => Box::new(Pll0x09(val)),
+        0x2A => Box::new(Pll0x0A(val)),
+        0x2B => Box::new(Pll0x0B(val)),
+        // 0x2C
+        // 0x2D
+        // 0x2E
+        // 0x2F
+        ////////////////////////////////////////////////////////////////////
+        // TX LPF                                                         //
+        ////////////////////////////////////////////////////////////////////
+        // 0x30
+        // 0x31
+        // 0x32
+        // 0x33
+        // 0x34
+        // 0x35
+        // 0x36
+        // 0x37
+        // 0x38
+        // 0x39
+        // 0x3A
+        // 0x3B
+        // 0x3C
+        // 0x3D
+        // 0x3E
+        // 0x3F
+        ////////////////////////////////////////////////////////////////////
+        // TX RF                                                          //
+        ////////////////////////////////////////////////////////////////////
+        // 0x40
+        // 0x41
+        // 0x42
+        // 0x43
+        // 0x44
+        // 0x45
+        // 0x46
+        // 0x47
+        // 0x48
+        // 0x49
+        // 0x4A
+        // 0x4B
+        // 0x4C
+        // 0x4D
+        // 0x4E
+        // 0x4F
+        ////////////////////////////////////////////////////////////////////
+        // RX LPF, DAC, ADC                                               //
+        ////////////////////////////////////////////////////////////////////
+        // 0x50
+        // 0x51
+        // 0x52
+        // 0x53
+        // 0x54
+        // 0x55
+        // 0x56
+        // 0x57
+        // 0x58
+        // 0x59
+        // 0x5A
+        // 0x5B
+        // 0x5C
+        // 0x5D
+        // 0x5E
+        // 0x5F
+        ////////////////////////////////////////////////////////////////////
+        // RX VGA2                                                        //
+        ////////////////////////////////////////////////////////////////////
+        // 0x60
+        // 0x61
+        // 0x62
+        // 0x63
+        // 0x64
+        // 0x65
+        // 0x66
+        // 0x67
+        // 0x68
+        // 0x69
+        // 0x6A
+        // 0x6B
+        // 0x6C
+        // 0x6D
+        // 0x6E
+        // 0x6F
+        ////////////////////////////////////////////////////////////////////
+        // RX FE                                                          //
+        ////////////////////////////////////////////////////////////////////
+        // 0x70
+        // 0x71
+        // 0x72
+        // 0x73
+        // 0x74
+        // 0x75
+        // 0x76
+        // 0x77
+        // 0x78
+        // 0x79
+        // 0x7A
+        // 0x7B
+        // 0x7C
+        // 0x7D
+        // 0x7E
+        // 0x7F
+        addr if addr < 128 => Box::new(val),
+        _ => return Err(()),
+    })
 }
