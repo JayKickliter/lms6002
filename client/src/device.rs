@@ -67,7 +67,7 @@ mod detail {
         pub fn read(&self, addr: u8) -> Result<u8, ()> {
             use std::io::{Read, Seek, SeekFrom};
             let mut f = self.0.borrow_mut();
-            f.seek(SeekFrom::Start(addr as u64)).or(Err(()))?;
+            f.seek(SeekFrom::Start(u64::from(addr))).or(Err(()))?;
             let mut buf = [0xfe; 1];
             f.read(&mut buf).or(Err(()))?;
             Ok(buf[0])
@@ -76,7 +76,7 @@ mod detail {
         pub fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
             use std::io::{Seek, SeekFrom, Write};
             let mut f = self.0.borrow_mut();
-            f.seek(SeekFrom::Start(addr as u64)).or(Err(()))?;
+            f.seek(SeekFrom::Start(u64::from(addr))).or(Err(()))?;
             let buf = [val; 1];
             f.write(&buf).or(Err(()))?;
             Ok(())
