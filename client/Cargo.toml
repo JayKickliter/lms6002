@@ -8,6 +8,7 @@ lms6002 = { path = "../lms6002" }
 log = "0.4.4"
 structopt = "0.2.10"
 env_logger = "0.5.12"
+spidev = { version = "0.3.0", optional = true }
 
-[target.'cfg(linux)'.dependencies]
-spidev = "0.3.0"
+[features]
+spi = [ "spidev" ]

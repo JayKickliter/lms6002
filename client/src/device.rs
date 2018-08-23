@@ -1,6 +1,6 @@
-#[cfg(target_os = "linux")]
+#[cfg(feature = "spi")]
 mod hidden {
-    use spidev::Spidev;
+    use spidev::{SpiTransfer, Spidev};
     use std::io;
     use std::path::Path;
 
@@ -9,9 +9,24 @@ mod hidden {
     }
 
     impl Device {
-        fn open(path: impl AsRef<Path>) -> io::Result<Self> {}
-        fn read(&self, addr: u8) -> Result<u8, ()> {}
-        fn write(&self, addr: u8, val: u8) -> Result<(), ()> {}
+        fn open(path: impl AsRef<Path>) -> io::Result<Self> {
+            let spidev = Spidev::open(path)?;
+            let mut options = SpidevOptions::new()
+                .bits_per_word(8)
+                .max_speed_hz(4_000_000)
+                .mode(SPI_MODE_0);
+            spidev.configure(&options)?;
+            Ok(Self { spidev })
+        }
+        fn read(&self, addr: u8) -> Result<u8, ()> {
+            let mut buf = [0u8; 2];
+            let mut xfer = SpidevTransfer::write(&buf);
+            try!(spi.transfer(&mut transfer));
+            println!("{:?}", transfer.rx_buf);
+        }
+        fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
+            let mut buf = [0u8; 2];
+        }
     }
 
     impl ::lms6002::Interface for Device {
@@ -25,7 +40,7 @@ mod hidden {
     }
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(feature = "spi"))]
 mod hidden {
     use std::cell::RefCell;
     use std::fs::File;
