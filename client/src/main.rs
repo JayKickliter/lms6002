@@ -3,7 +3,7 @@ extern crate structopt;
 extern crate env_logger;
 extern crate lms6002;
 extern crate log;
-#[cfg(target_os = "linux")]
+#[cfg(feature = "spi")]
 extern crate spidev;
 use structopt::StructOpt;
 

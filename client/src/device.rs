@@ -1,47 +1,52 @@
+pub use self::detail::*;
+
 #[cfg(feature = "spi")]
-mod hidden {
-    use spidev::{SpiTransfer, Spidev};
+mod detail {
+    use spidev::*;
     use std::io;
     use std::path::Path;
 
     pub struct Device {
-        spidev: Spidev,
+        spi: Spidev,
     }
 
     impl Device {
-        fn open(path: impl AsRef<Path>) -> io::Result<Self> {
-            let spidev = Spidev::open(path)?;
-            let mut options = SpidevOptions::new()
+        pub fn open(path: impl AsRef<Path>) -> io::Result<Self> {
+            let mut spi = Spidev::open(path)?;
+            let mut options = SpidevOptions::new();
+            options
                 .bits_per_word(8)
                 .max_speed_hz(4_000_000)
                 .mode(SPI_MODE_0);
-            spidev.configure(&options)?;
-            Ok(Self { spidev })
-        }
-        fn read(&self, addr: u8) -> Result<u8, ()> {
-            let mut buf = [0u8; 2];
-            let mut xfer = SpidevTransfer::write(&buf);
-            try!(spi.transfer(&mut transfer));
-            println!("{:?}", transfer.rx_buf);
-        }
-        fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
-            let mut buf = [0u8; 2];
-        }
-    }
-
-    impl ::lms6002::Interface for Device {
-        fn read(&self, addr: u8) -> Result<u8, ()> {
-            self.read(addr)
+            spi.configure(&options)?;
+            Ok(Self { spi })
         }
 
-        fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
-            self.write(addr, val)
+        pub fn read(&self, addr: u8) -> Result<u8, ()> {
+            let tx_buf = [addr];
+            let mut rx_buf = [0; 2];
+            {
+                let mut xfer = SpidevTransfer::read_write(&tx_buf, &mut rx_buf);
+                self.spi.transfer(&mut xfer).or(Err(()))?;
+            }
+            Ok(rx_buf[1])
+        }
+
+        pub fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
+            let tx_buf = [
+                // Set upper bit to 1 to indicate a write operation.
+                addr & 0b1000_0000,
+                val,
+            ];
+            let mut xfer = SpidevTransfer::write(&tx_buf);
+            self.spi.transfer(&mut xfer).or(Err(()))?;
+            Ok(())
         }
     }
 }
 
 #[cfg(not(feature = "spi"))]
-mod hidden {
+mod detail {
     use std::cell::RefCell;
     use std::fs::File;
     use std::io;
@@ -77,16 +82,16 @@ mod hidden {
             Ok(())
         }
     }
-
-    impl ::lms6002::Interface for Device {
-        fn read(&self, addr: u8) -> Result<u8, ()> {
-            self.read(addr)
-        }
-
-        fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
-            self.write(addr, val)
-        }
-    }
 }
 
-pub use self::hidden::*;
+impl ::lms6002::Interface for Device {
+    fn read(&self, addr: u8) -> Result<u8, ()> {
+        assert!(addr < 128);
+        self.read(addr)
+    }
+
+    fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
+        assert!(addr < 128);
+        self.write(addr, val)
+    }
+}
