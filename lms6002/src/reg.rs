@@ -53,16 +53,16 @@ macro_rules! lmsreg {
 ////////////////////////////////////////////////////////////////////////////
 
 bitfield!{
-    pub struct Top00(u8);
+    pub struct Top0x00(u8);
     impl Debug;
 
     /// Value from DC calibration module selected by `DC_ADDR`.
     pub dc_regval, _: 5, 0;
 }
-lmsreg!(Top00, 0);
+lmsreg!(Top0x00, 0x00);
 
 bitfield!{
-    pub struct Top01(u8);
+    pub struct Top0x01(u8);
     impl Debug;
 
     /// Value of the cal_core block in the LPF which calibrates the RC
@@ -88,19 +88,19 @@ bitfield!{
     /// - 0: Count Down.
     pub dc_ud, _: 0;
 }
-lmsreg!(Top01, 01);
+lmsreg!(Top0x01, 0x01);
 
 bitfield!{
-    pub struct Top02(u8);
+    pub struct Top0x02(u8);
     impl Debug;
 
     /// Value to load into selected (by `DC_ADDR`) DC calibration module.
     pub dc_cntval, set_dc_cntval: 5, 0;
 }
-lmsreg!(Top02, 02);
+lmsreg!(Top0x02, 0x02);
 
 bitfield!{
-    pub struct Top03(u8);
+    pub struct Top0x03(u8);
     impl Debug;
 
     /// Start calibration command of the module, selected by `DC_ADDR`.
@@ -124,10 +124,10 @@ bitfield!{
     /// - 001...111: Not used
     pub dc_addr, set_dc_addr: 2, 0;
 }
-lmsreg!(Top03, 03);
+lmsreg!(Top0x03, 0x03);
 
 bitfield!{
-    pub struct Top04(u8);
+    pub struct Top0x04(u8);
     impl Debug;
 
     /// Chip version.
@@ -136,10 +136,10 @@ bitfield!{
     /// Chip revision.
     pub rev, _: 3, 0;
 }
-lmsreg!(Top04, 04);
+lmsreg!(Top0x04, 0x04);
 
 bitfield!{
-    pub struct Top05(u8);
+    pub struct Top0x05(u8);
     impl Debug;
 
     /// - 0: decode control signals (default)
@@ -171,10 +171,10 @@ bitfield!{
     // - 1: four wire mode (default)
     pub tfwmode, set_tfwmode: 1;
 }
-lmsreg!(Top05, 05);
+lmsreg!(Top0x05, 0x05);
 
 bitfield!{
-    pub struct Top06(u8);
+    pub struct Top0x06(u8);
     impl Debug;
 
     /// Select the clock for LPF tuning module.
@@ -199,10 +199,10 @@ bitfield!{
     /// - 1: reset state (default)
     pub rst_cal_lpfcal, set_rst_cal_lpfcal: 0;
 }
-lmsreg!(Top06, 06);
+lmsreg!(Top0x06, 0x06);
 
 bitfield!{
-    pub struct Top07(u8);
+    pub struct Top0x07(u8);
     impl Debug;
 
     /// Enable signal.
@@ -240,10 +240,10 @@ bitfield!{
     /// | 1111 |  0.75           |
     pub bwc_lpfcal, set_bwc_lpfcal: 3, 0;
 }
-lmsreg!(Top07, 07);
+lmsreg!(Top0x07, 0x07);
 
 bitfield!{
-    pub struct Top08(u8);
+    pub struct Top0x08(u8);
     impl Debug;
 
     /// BB loopback enable.
@@ -271,10 +271,10 @@ bitfield!{
     /// - 4-15: Reserved. Not valid for settings.
     pub lbrfen, set_lbrfen: 3, 0;
 }
-lmsreg!(Top08, 08);
+lmsreg!(Top0x08, 0x08);
 
 bitfield!{
-    pub struct Top09(u8);
+    pub struct Top0x09(u8);
     impl Debug;
 
     // RX out/ADC in high-Z switch control
@@ -310,10 +310,10 @@ bitfield!{
     /// - 0: Tx DSM SPI clock disabled (default)
     pub tx_dsm_spi_clk_en, set_tx_dsm_spi_clk_en: 0;
 }
-lmsreg!(Top09, 09);
+lmsreg!(Top0x09, 0x09);
 
 bitfield!{
-    pub struct Top10(u8);
+    pub struct Top0x0A(u8);
     impl Debug;
 
     /// Frequency/Time division duplexing selection
@@ -326,10 +326,10 @@ bitfield!{
     /// - 1: TDD Receive mode
     pub tddmod, set_tddmod: 0;
 }
-lmsreg!(Top10, 10);
+lmsreg!(Top0x0A, 0x0A);
 
 bitfield!{
-    pub struct Top11(u8);
+    pub struct Top0x0B(u8);
     impl Debug;
 
     /// XCO buffer power down
@@ -355,7 +355,7 @@ bitfield!{
     /// - 0: RF loop back switch powered down (default)
     pub pu_rf_lbs, set_pu_rf_lbs: 0;
 }
-lmsreg!(Top11, 11);
+lmsreg!(Top0x0B, 0x0B);
 
 ////////////////////////////////////////////////////////////////////////////
 // PLL Registers                                                          //
@@ -414,16 +414,16 @@ macro_rules! pllreg {
 }
 
 bitfield!{
-    pub struct Pll00(u8);
+    pub struct Pll0x00(u8);
     impl Debug;
 
     /// Integer part of the divider (MSBs)
     pub nint_8_1, set_nint_8_1: 7, 0;
 }
-pllreg!(Pll00, 00);
+pllreg!(Pll0x00, 0x00);
 
 bitfield!{
-    pub struct Pll01(u8);
+    pub struct Pll0x01(u8);
     impl Debug;
 
     /// Integer part of the divider (LSB)
@@ -432,28 +432,28 @@ bitfield!{
     /// Fractional part of the divider
     pub nfrac_22_16, set_nfrac_22_16: 6, 0;
 }
-pllreg!(Pll01, 01);
+pllreg!(Pll0x01, 0x01);
 
 bitfield!{
-    pub struct Pll02(u8);
+    pub struct Pll0x02(u8);
     impl Debug;
 
     /// Fractional part of the divider
     pub nfrac_15_8, set_nfrac_15_8: 7, 0;
 }
-pllreg!(Pll02, 02);
+pllreg!(Pll0x02, 0x02);
 
 bitfield!{
-    pub struct Pll03(u8);
+    pub struct Pll0x03(u8);
     impl Debug;
 
     /// Fractional part of the divider
     pub nfrac_7_0, set_nfrac_7_0: 7, 0;
 }
-pllreg!(Pll03, 03);
+pllreg!(Pll0x03, 0x03);
 
 bitfield!{
-    pub struct Pll04(u8);
+    pub struct Pll0x04(u8);
     impl Debug;
 
     /// Dithering control
@@ -484,10 +484,10 @@ bitfield!{
     /// - 1: use power down/enable signals from test mode registers
     pub decode, set_decode: 1;
 }
-pllreg!(Pll04, 04);
+pllreg!(Pll0x04, 0x04);
 
 bitfield!{
-    pub struct Pll05(u8);
+    pub struct Pll0x05(u8);
     impl Debug;
 
     /// VCO selection
@@ -512,10 +512,10 @@ bitfield!{
     /// - 11: Third buffer enabled for LNA3 path
     pub selout, set_selout: 1, 0;
 }
-pllreg!(Pll05, 05);
+pllreg!(Pll0x05, 0x05);
 
 bitfield!{
-    pub struct Pll06(u8);
+    pub struct Pll0x06(u8);
     impl Debug;
 
     /// Enable PFD UP pulses
@@ -540,10 +540,10 @@ bitfield!{
     /// - 2400 uA
     pub ichp, set_ichp: 4, 0;
 }
-pllreg!(Pll06, 06);
+pllreg!(Pll0x06, 0x06);
 
 bitfield!{
-    pub struct Pll07(u8);
+    pub struct Pll0x07(u8);
     impl Debug;
 
     /// Bypass VCO regulator
@@ -572,10 +572,10 @@ bitfield!{
     /// - ...: 240uA
     pub offup, set_offup: 5, 0;
 }
-pllreg!(Pll07, 07);
+pllreg!(Pll0x07, 0x07);
 
 bitfield!{
-    pub struct Pll08(u8);
+    pub struct Pll0x08(u8);
     impl Debug;
 
     /// VCO regulator output voltage control, 3 MSBs.
@@ -599,10 +599,10 @@ bitfield!{
     /// - ...: 240uA
     pub offdown, set_offdown: 4, 0;
 }
-pllreg!(Pll08, 08);
+pllreg!(Pll0x08, 0x08);
 
 bitfield!{
-    pub struct Pll09(u8);
+    pub struct Pll0x09(u8);
     impl Debug;
 
     /// VCO regulator output voltage control, LSB
@@ -614,10 +614,10 @@ bitfield!{
     /// - 111111 (min capacitance, max frequency)
     pub vcocap, set_vcocap: 5, 0;
 }
-pllreg!(Pll09, 09);
+pllreg!(Pll0x09, 0x09);
 
 bitfield!{
-    pub struct Pll10(u8);
+    pub struct Pll0x0A(u8);
     impl Debug;
 
     /// Value from Vtune comparator (Read Only)
@@ -626,10 +626,10 @@ bitfield!{
     /// Value from Vtune comparator (Read Only)
     pub vtune_l, _: 6;
 }
-pllreg!(Pll10, 10);
+pllreg!(Pll0x0A, 0x0A);
 
 bitfield!{
-    pub struct Pll11(u8);
+    pub struct Pll0x0B(u8);
     impl Debug;
 
     /// VCO Comparator Enable
@@ -637,7 +637,7 @@ bitfield!{
     /// - 1: disabled (powered down)
     pub pd_vcocomp_sx, set_pd_vcocomp_sx: 3;
 }
-pllreg!(Pll11, 11);
+pllreg!(Pll0x0B, 0x0B);
 
 /// Returns a boxed `Debug` object from a register's `addr` and `val`
 /// pair.
@@ -645,18 +645,18 @@ pllreg!(Pll11, 11);
 /// This a weak form of up-casting.
 pub fn into_debug(addr: u8, val: u8) -> Box<Debug> {
     match addr {
-        00 => Box::new(Top00(val)),
-        01 => Box::new(Top01(val)),
-        02 => Box::new(Top02(val)),
-        03 => Box::new(Top03(val)),
-        04 => Box::new(Top04(val)),
-        05 => Box::new(Top05(val)),
-        06 => Box::new(Top06(val)),
-        07 => Box::new(Top07(val)),
-        08 => Box::new(Top08(val)),
-        09 => Box::new(Top09(val)),
-        10 => Box::new(Top10(val)),
-        11 => Box::new(Top11(val)),
+        0x00 => Box::new(Top0x00(val)),
+        0x01 => Box::new(Top0x01(val)),
+        0x02 => Box::new(Top0x02(val)),
+        0x03 => Box::new(Top0x03(val)),
+        0x04 => Box::new(Top0x04(val)),
+        0x05 => Box::new(Top0x05(val)),
+        0x06 => Box::new(Top0x06(val)),
+        0x07 => Box::new(Top0x07(val)),
+        0x08 => Box::new(Top0x08(val)),
+        0x09 => Box::new(Top0x09(val)),
+        0x0A => Box::new(Top0x0A(val)),
+        0x0B => Box::new(Top0x0B(val)),
         _ => Box::new((addr, val)),
     }
 }
