@@ -23,7 +23,7 @@ mod detail {
         }
 
         pub fn read(&self, addr: u8) -> io::Result<u8> {
-            let tx_buf = [addr];
+            let tx_buf = [addr, 0];
             let mut rx_buf = [0; 2];
             {
                 let mut xfer = SpidevTransfer::read_write(&tx_buf, &mut rx_buf);
