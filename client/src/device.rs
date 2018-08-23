@@ -11,7 +11,7 @@ mod detail {
     }
 
     impl Device {
-        pub fn open(path: impl AsRef<Path>) -> io::Result<Self> {
+        pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Self> {
             let mut spi = Spidev::open(path)?;
             let mut options = SpidevOptions::new();
             options
@@ -27,7 +27,7 @@ mod detail {
             let mut rx_buf = [0; 2];
             {
                 let mut xfer = SpidevTransfer::read_write(&tx_buf, &mut rx_buf);
-                self.spi.transfer(&mut xfer).or(Err(()))?;
+                self.spi.transfer(&mut xfer)?;
             }
             Ok(rx_buf[1])
         }
@@ -55,7 +55,7 @@ mod detail {
     pub struct Device(RefCell<File>);
 
     impl Device {
-        pub fn open(path: impl AsRef<Path>) -> io::Result<Self> {
+        pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Self> {
             let f = ::std::fs::OpenOptions::new()
                 .create(true)
                 .read(true)
