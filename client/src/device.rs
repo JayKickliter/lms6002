@@ -22,7 +22,7 @@ mod detail {
             Ok(Self { spi })
         }
 
-        pub fn read(&self, addr: u8) -> Result<u8, ()> {
+        pub fn read(&self, addr: u8) -> io::Result<u8> {
             let tx_buf = [addr];
             let mut rx_buf = [0; 2];
             {
@@ -32,14 +32,14 @@ mod detail {
             Ok(rx_buf[1])
         }
 
-        pub fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
+        pub fn write(&self, addr: u8, val: u8) -> io::Result<()> {
             let tx_buf = [
                 // Set upper bit to 1 to indicate a write operation.
                 addr & 0b1000_0000,
                 val,
             ];
             let mut xfer = SpidevTransfer::write(&tx_buf);
-            self.spi.transfer(&mut xfer).or(Err(()))?;
+            self.spi.transfer(&mut xfer)?;
             Ok(())
         }
     }
@@ -64,21 +64,21 @@ mod detail {
             Ok(Device(RefCell::new(f)))
         }
 
-        pub fn read(&self, addr: u8) -> Result<u8, ()> {
+        pub fn read(&self, addr: u8) -> io::Result<u8> {
             use std::io::{Read, Seek, SeekFrom};
             let mut f = self.0.borrow_mut();
-            f.seek(SeekFrom::Start(u64::from(addr))).or(Err(()))?;
+            f.seek(SeekFrom::Start(u64::from(addr)))?;
             let mut buf = [0xfe; 1];
-            f.read(&mut buf).or(Err(()))?;
+            f.read(&mut buf)?;
             Ok(buf[0])
         }
 
-        pub fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
+        pub fn write(&self, addr: u8, val: u8) -> io::Result<()> {
             use std::io::{Seek, SeekFrom, Write};
             let mut f = self.0.borrow_mut();
-            f.seek(SeekFrom::Start(u64::from(addr))).or(Err(()))?;
+            f.seek(SeekFrom::Start(u64::from(addr)))?;
             let buf = [val; 1];
-            f.write(&buf).or(Err(()))?;
+            f.write(&buf)?;
             Ok(())
         }
     }
@@ -87,11 +87,11 @@ mod detail {
 impl ::lms6002::Interface for Device {
     fn read(&self, addr: u8) -> Result<u8, ()> {
         assert!(addr < 128);
-        self.read(addr)
+        self.read(addr).or(Err(()))
     }
 
     fn write(&self, addr: u8, val: u8) -> Result<(), ()> {
         assert!(addr < 128);
-        self.write(addr, val)
+        self.write(addr, val).or(Err(()))
     }
 }
