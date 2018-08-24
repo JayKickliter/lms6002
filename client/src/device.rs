@@ -35,7 +35,7 @@ mod detail {
         pub fn write(&self, addr: u8, val: u8) -> io::Result<()> {
             let tx_buf = [
                 // Set upper bit to 1 to indicate a write operation.
-                addr & 0b1000_0000,
+                addr | 0b1000_0000,
                 val,
             ];
             let mut xfer = SpidevTransfer::write(&tx_buf);
