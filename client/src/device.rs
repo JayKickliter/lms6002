@@ -69,7 +69,7 @@ mod detail {
             let mut f = self.0.borrow_mut();
             f.seek(SeekFrom::Start(u64::from(addr)))?;
             let mut buf = [0xfe; 1];
-            f.read(&mut buf)?;
+            f.read_exact(&mut buf)?;
             Ok(buf[0])
         }
 
@@ -78,7 +78,7 @@ mod detail {
             let mut f = self.0.borrow_mut();
             f.seek(SeekFrom::Start(u64::from(addr)))?;
             let buf = [val; 1];
-            f.write(&buf)?;
+            f.write_all(&buf)?;
             Ok(())
         }
     }
