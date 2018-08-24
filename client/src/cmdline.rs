@@ -35,10 +35,6 @@ impl_from_hex_dec_bin!(u8, ParseIntError);
 
 #[derive(StructOpt, Debug)]
 pub struct Opts {
-    #[structopt(short = "l", parse(from_occurrences))]
-    // Adds more logging for every `-l[l...]`
-    pub log_level: u64,
-
     #[structopt(parse(from_os_str))]
     pub dev: PathBuf,
 

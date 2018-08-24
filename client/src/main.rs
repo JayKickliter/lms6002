@@ -34,18 +34,7 @@ fn go(opts: Opts) {
 }
 
 fn main() {
+    env_logger::init();
     let opts = Opts::from_args();
-    env_logger::Builder::from_default_env()
-        .filter(
-            None,
-            match opts.log_level {
-                0 => log::LevelFilter::Off,
-                1 => log::LevelFilter::Error,
-                2 => log::LevelFilter::Warn,
-                3 => log::LevelFilter::Info,
-                4 => log::LevelFilter::Debug,
-                _ => log::LevelFilter::Trace,
-            },
-        ).init();
     go(opts);
 }
