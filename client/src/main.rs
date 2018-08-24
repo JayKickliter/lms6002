@@ -19,7 +19,7 @@ fn go(opts: Opts) {
         Cmd::Reg { addr, write: None } => {
             let val = lms.read(addr).unwrap();
             println!(
-                "0x{:02x}: {:#x?}",
+                "0x{:02x}: {:#?}",
                 addr,
                 lms6002::reg::into_debug(addr, val).unwrap()
             );
