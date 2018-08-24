@@ -1,10 +1,10 @@
-#[macro_use]
-extern crate structopt;
 extern crate env_logger;
 extern crate lms6002;
 extern crate log;
 #[cfg(feature = "spi")]
 extern crate spidev;
+#[macro_use]
+extern crate structopt;
 use structopt::StructOpt;
 
 mod cmdline;
@@ -18,7 +18,11 @@ fn go(opts: Opts) {
     match opts.cmd {
         Cmd::Reg { addr, write: None } => {
             let val = lms.read(addr).unwrap();
-            println!("0x{:02x}: {:#?}", addr, lms6002::reg::into_debug(addr, val).unwrap());
+            println!(
+                "0x{:02x}: {:#x?}",
+                addr,
+                lms6002::reg::into_debug(addr, val).unwrap()
+            );
         }
         Cmd::Reg {
             addr,
