@@ -27,7 +27,7 @@ pub trait LmsReg: Debug + From<u8> + Into<u8> + Copy {
 
 macro_rules! lmsreg {
     // lmsreg!(Top00, 0);
-    ( $reg:tt, $offset:expr ) => {
+    ($reg:tt, $offset:expr) => {
         impl ::std::convert::From<u8> for $reg {
             fn from(val: u8) -> $reg {
                 $reg(val)
@@ -395,7 +395,7 @@ impl PllMod for RxPll {
 pub struct PllReg<R: Debug + Copy, M: PllMod>(pub R, PhantomData<M>);
 
 macro_rules! pllreg {
-    ( $reg:tt, $offset:expr ) => {
+    ($reg:tt, $offset:expr) => {
         impl<M: PllMod> ::std::convert::AsRef<$reg> for PllReg<$reg, M> {
             fn as_ref(&self) -> &$reg {
                 &self.0
