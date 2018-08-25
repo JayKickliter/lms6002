@@ -13,6 +13,7 @@ mod device;
 use cmdline::*;
 
 fn go(opts: Opts) {
+    use lms6002::Path;
     let iface = device::Device::open(opts.dev).unwrap();
     let lms = lms6002::LMS6002::new(iface, 40_000_000);
     match opts.cmd {
@@ -30,6 +31,11 @@ fn go(opts: Opts) {
         } => {
             lms.write(addr, val).unwrap();
         }
+        Cmd::RX(TRXCmd::Enable) => lms.trx_enable(Path::RX, true).unwrap(),
+        Cmd::TX(TRXCmd::Enable) => lms.trx_enable(Path::TX, true).unwrap(),
+        Cmd::RX(TRXCmd::Disable) => lms.trx_enable(Path::RX, false).unwrap(),
+        Cmd::TX(TRXCmd::Disable) => lms.trx_enable(Path::TX, false).unwrap(),
+        _ => panic!("Unhandled command."),
     }
 }
 

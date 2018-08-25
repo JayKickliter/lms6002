@@ -38,19 +38,43 @@ pub struct Opts {
     pub cmd: Cmd,
 }
 
+/// Top-level commands.
 #[derive(Debug, StructOpt)]
 pub enum Cmd {
-    /// Direct register manipulation
+    /// Configure the RX path.
+    #[structopt(name = "rx")]
+    RX(TRXCmd),
+
+    /// Configure the RX path.
+    #[structopt(name = "tx")]
+    TX(TRXCmd),
+
+    /// Direct register manipulation.
     #[structopt(name = "reg")]
     Reg {
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
         addr: u8,
         #[structopt(
-            long = "write",
-            name = "val",
-            parse(try_from_str = "FromHexDecBin::from_hex_dec_bin")
+            long = "write", name = "val", parse(try_from_str = "FromHexDecBin::from_hex_dec_bin")
         )]
         /// Write val
         write: Option<u8>,
     },
+}
+
+/// High-level commands specific to TX/RX path
+#[derive(Debug, StructOpt)]
+pub enum TRXCmd {
+    /// Soft-enable this path.
+    #[structopt(name = "enable")]
+    Enable,
+    /// Soft-disable this path.
+    #[structopt(name = "disable")]
+    Disable,
+    /// Soft-reset this path.
+    #[structopt(name = "reset")]
+    Reset,
+    /// Tune to specified frequency.
+    #[structopt(name = "tune")]
+    Tune,
 }
