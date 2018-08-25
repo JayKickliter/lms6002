@@ -1,22 +1,18 @@
 use std::path::PathBuf;
 
-use std::num::ParseIntError;
-
 /// Will attempt to parse an integer from a hex, binary, or decimal
 /// string based on the leading two characters:
 /// - `0x`: parse as hex
 /// - `0b`: binary
 /// - other: decimal
 trait FromHexDecBin: Sized {
-    type Error;
-    fn from_hex_dec_bin(&str) -> Result<Self, Self::Error>;
+    fn from_hex_dec_bin(&str) -> Result<Self, ::std::num::ParseIntError>;
 }
 
 macro_rules! impl_from_hex_dec_bin {
-    ($T:tt, $E:ty) => {
+    ($T:tt) => {
         impl FromHexDecBin for $T {
-            type Error = $E;
-            fn from_hex_dec_bin(s: &str) -> Result<$T, Self::Error> {
+            fn from_hex_dec_bin(s: &str) -> Result<$T, ::std::num::ParseIntError> {
                 if s.len() > 2 {
                     match s.split_at(2) {
                         ("0x", rest) => $T::from_str_radix(rest, 16),
@@ -31,7 +27,7 @@ macro_rules! impl_from_hex_dec_bin {
     };
 }
 
-impl_from_hex_dec_bin!(u8, ParseIntError);
+impl_from_hex_dec_bin!(u8);
 
 #[derive(StructOpt, Debug)]
 pub struct Opts {
