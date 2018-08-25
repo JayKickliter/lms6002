@@ -121,8 +121,8 @@ impl<I: Interface> LMS6002<I> {
     pub fn trx_enable(&self, path: Path, enable: bool) -> Result<()> {
         let endis = if enable { "Enabling" } else { "Disabling" };
         info!("{} {:?} path.", endis, path);
-        let mut r05 = self.read_reg::<reg::Top0x05>()?;
-        let mut r09 = self.read_reg::<reg::Top0x09>()?;
+        let mut r05: reg::Top0x05 = self.read_reg()?;
+        let mut r09: reg::Top0x09 = self.read_reg()?;
         match path {
             Path::RX => {
                 r05.set_srxen(enable);
@@ -133,6 +133,8 @@ impl<I: Interface> LMS6002<I> {
                 r09.set_tx_dsm_spi_clk_en(enable);
             }
         }
+        self.write_reg(r05)?;
+        self.write_reg(r09)?;
         Ok(())
     }
 }
