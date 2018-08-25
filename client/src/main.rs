@@ -8,13 +8,13 @@ extern crate structopt;
 use structopt::StructOpt;
 
 mod cmdline;
-mod device;
+mod interface;
 
 use cmdline::*;
 
 fn go(opts: Opts) {
     use lms6002::Path;
-    let iface = device::Device::open(opts.dev).unwrap();
+    let iface = interface::Interface::open(opts.dev).unwrap();
     let lms = lms6002::LMS6002::new(iface, 40_000_000);
     match opts.cmd {
         Cmd::Reg { addr, write: None } => {

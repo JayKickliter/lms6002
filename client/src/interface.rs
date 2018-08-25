@@ -6,11 +6,11 @@ mod detail {
     use std::io;
     use std::path::Path;
 
-    pub struct Device {
+    pub struct Interface {
         spi: Spidev,
     }
 
-    impl Device {
+    impl Interface {
         pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Self> {
             let mut spi = Spidev::open(path)?;
             let mut options = SpidevOptions::new();
@@ -52,16 +52,16 @@ mod detail {
     use std::io;
     use std::path::Path;
 
-    pub struct Device(RefCell<File>);
+    pub struct Interface(RefCell<File>);
 
-    impl Device {
+    impl Interface {
         pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Self> {
             let f = ::std::fs::OpenOptions::new()
                 .create(true)
                 .read(true)
                 .write(true)
                 .open(path)?;
-            Ok(Device(RefCell::new(f)))
+            Ok(Interface(RefCell::new(f)))
         }
 
         pub fn read(&self, addr: u8) -> io::Result<u8> {
@@ -84,7 +84,7 @@ mod detail {
     }
 }
 
-impl ::lms6002::Interface for Device {
+impl ::lms6002::Interface for Interface {
     fn read(&self, addr: u8) -> Result<u8, ()> {
         assert!(addr < 128);
         self.read(addr).or(Err(()))
