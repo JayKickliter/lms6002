@@ -5,12 +5,12 @@ extern crate log;
 extern crate spidev;
 #[macro_use]
 extern crate structopt;
-use structopt::StructOpt;
 
 mod cmdline;
 mod interface;
 
 use cmdline::*;
+use structopt::StructOpt;
 
 fn go(opts: Opts) {
     use lms6002::Path;
