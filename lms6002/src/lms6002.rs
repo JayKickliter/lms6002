@@ -116,4 +116,21 @@ impl<I: Interface> LMS6002<I> {
     {
         op(&mut self.iface)
     }
+
+    /// [En,Dis]ables the TX or RX path.
+    pub fn trx_enable(&self, path: Path, enable: bool) -> Result<()> {
+        let mut r05 = self.read_reg::<reg::Top0x05>()?;
+        let mut r09 = self.read_reg::<reg::Top0x09>()?;
+        match path {
+            Path::RX => {
+                r05.set_srxen(enable);
+                r09.set_rx_dsm_spi_clk_en(enable);
+            }
+            Path::TX => {
+                r05.set_stxen(enable);
+                r09.set_tx_dsm_spi_clk_en(enable);
+            }
+        }
+        Ok(())
+    }
 }
