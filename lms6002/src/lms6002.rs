@@ -119,6 +119,8 @@ impl<I: Interface> LMS6002<I> {
 
     /// [En,Dis]ables the TX or RX path.
     pub fn trx_enable(&self, path: Path, enable: bool) -> Result<()> {
+        let endis = if enable { "Enabling" } else { "Disabling" };
+        info!("{} {:?} path.", endis, path);
         let mut r05 = self.read_reg::<reg::Top0x05>()?;
         let mut r09 = self.read_reg::<reg::Top0x09>()?;
         match path {
