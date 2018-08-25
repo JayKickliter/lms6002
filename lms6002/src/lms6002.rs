@@ -34,7 +34,7 @@ impl<I: Interface> LMS6002<I> {
     pub fn read(&self, addr: u8) -> Result<u8> {
         match self.iface.read(addr) {
             Ok(val) => {
-                trace!("Read 0x{:02x} from 0x{:02x}", val, addr);
+                debug!("Read 0x{:02x} from 0x{:02x}", val, addr);
                 Ok(val)
             }
             Err(_) => {
@@ -47,7 +47,7 @@ impl<I: Interface> LMS6002<I> {
     pub fn write(&self, addr: u8, val: u8) -> Result<()> {
         match self.iface.write(addr, val) {
             Ok(_) => {
-                trace!("Wrote 0x{:02x} to 0x{:02x}", val, addr);
+                debug!("Wrote 0x{:02x} to 0x{:02x}", val, addr);
                 Ok(())
             }
             Err(_) => {
@@ -78,7 +78,7 @@ impl<I: Interface> LMS6002<I> {
         T: reg::LmsReg,
         F: FnOnce(T) -> T,
     {
-        trace!("Performing RMW on LMS register at 0x{:02x}", T::addr());
+        debug!("Performing RMW on LMS register at 0x{:02x}", T::addr());
         let r: T = self.read_reg()?;
         let m = op(r);
         self.write_reg(m)?;
