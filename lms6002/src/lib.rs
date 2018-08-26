@@ -4,6 +4,7 @@ extern crate bitfield;
 #[macro_use]
 extern crate log;
 
+mod algo;
 mod error;
 mod interface;
 mod lms6002;
