@@ -77,12 +77,12 @@ impl<I: Interface> LMS6002<I> {
     pub fn rmw_reg<T, F>(&self, op: F) -> Result<()>
     where
         T: reg::LmsReg,
-        F: FnOnce(T) -> T,
+        F: FnOnce(&mut T),
     {
         debug!("Performing RMW on LMS register at 0x{:02x}", T::addr());
-        let r: T = self.read_reg()?;
-        let m = op(r);
-        self.write_reg(m)?;
+        let mut r: T = self.read_reg()?;
+        op(&mut r);
+        self.write_reg(r)?;
         Ok(())
     }
 
@@ -122,22 +122,21 @@ impl<I: Interface> LMS6002<I> {
 
     /// [En,Dis]ables the TX or RX path.
     pub fn trx_enable(&self, path: Path, enable: bool) -> Result<()> {
-        let endis = if enable { "Enabling" } else { "Disabling" };
-        info!("{} {:?} path.", endis, path);
-        let mut r05: reg::Top0x05 = self.read_reg()?;
-        let mut r09: reg::Top0x09 = self.read_reg()?;
+        info!(
+            "{} {:?} path.",
+            if enable { "Enabling" } else { "Disabling" },
+            path
+        );
         match path {
             Path::RX => {
-                r05.set_srxen(enable);
-                r09.set_rx_dsm_spi_clk_en(enable);
+                self.rmw_reg(|r05: &mut reg::Top0x05| r05.set_srxen(enable))?;
+                self.rmw_reg(|r09: &mut reg::Top0x09| r09.set_rx_dsm_spi_clk_en(enable))?;
             }
             Path::TX => {
-                r05.set_stxen(enable);
-                r09.set_tx_dsm_spi_clk_en(enable);
+                self.rmw_reg(|r05: &mut reg::Top0x05| r05.set_stxen(enable))?;
+                self.rmw_reg(|r09: &mut reg::Top0x09| r09.set_tx_dsm_spi_clk_en(enable))?;
             }
         }
-        self.write_reg(r05)?;
-        self.write_reg(r09)?;
         Ok(())
     }
 }
