@@ -164,7 +164,7 @@ const FREQSEL_LUT: [(u32, u32, u8); 16] = [
 fn freqsel(freq: u32) -> Option<u8> {
     FREQSEL_LUT
         .iter()
-        .find(|&(l, h, _)| l < &freq && &freq < h)
+        .find(|&&(l, h, _)| l < freq && freq < h)
         .map(|&(_, _, val)| val)
 }
 
@@ -173,13 +173,13 @@ mod tests {
     #[test]
     fn test_freqsel() {
         use super::{freqsel, FREQSEL_LUT};
-        for (l, h, val) in &FREQSEL_LUT {
+        for &(l, h, val) in &FREQSEL_LUT {
             let freq = (h - l) / 2 + l;
-            assert_eq!(freqsel(freq), Some(*val));
+            assert_eq!(freqsel(freq), Some(val));
             let freq = l - 1;
-            assert!(freqsel(freq) != Some(*val));
+            assert!(freqsel(freq) != Some(val));
             let freq = h + 1;
-            assert!(freqsel(freq) != Some(*val));
+            assert!(freqsel(freq) != Some(val));
         }
     }
 }
