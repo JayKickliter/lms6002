@@ -30,6 +30,7 @@ pub enum Path {
     TX,
 }
 
+/// Low-level API.
 impl<I: Interface> LMS6002<I> {
     pub fn read(&self, addr: u8) -> Result<u8> {
         match self.iface.read(addr) {
@@ -85,17 +86,6 @@ impl<I: Interface> LMS6002<I> {
         Ok(())
     }
 
-    /// Returns a new `LMS6002`.
-    ///
-    /// ## Parameters
-    ///
-    /// * `iface`: a user-defined type that implements `Interface`.
-    /// * `clk`: reference clock speed for your chip.
-    ///          This is application-specific, thus a parameter.
-    pub fn new(iface: I, clk: u32) -> Self {
-        Self { iface, clk }
-    }
-
     /// Consumes `self` and returns the inner interface.
     pub fn into_inner(self) -> I {
         self.iface
@@ -115,6 +105,19 @@ impl<I: Interface> LMS6002<I> {
         F: FnOnce(&mut I) -> R,
     {
         op(&mut self.iface)
+    }
+}
+
+impl<I: Interface> LMS6002<I> {
+    /// Returns a new `LMS6002`.
+    ///
+    /// ## Parameters
+    ///
+    /// * `iface`: a user-defined type that implements `Interface`.
+    /// * `clk`: reference clock speed for your chip.
+    ///          This is application-specific, thus a parameter.
+    pub fn new(iface: I, clk: u32) -> Self {
+        Self { iface, clk }
     }
 
     /// [En,Dis]ables the TX or RX path.
