@@ -1,5 +1,12 @@
 use error::*;
 
+#[derive(Debug)]
+struct TuningParams {
+    pub freqsel: u8,
+    pub nint: u16,
+    pub nfrac: u32,
+}
+
 const FREQSEL_LUT: [(u32, u32, u8); 16] = [
     (232_500_000, 285_625_000, 0b100111),
     (285_625_000, 336_875_000, 0b101111),
@@ -26,12 +33,17 @@ fn freqsel(freq: u32) -> Result<u8> {
         .map(|&(_, _, val)| val)
         .ok_or(Error::Range)
 }
-
-#[derive(Debug)]
-struct TuningParams {
-    pub freqsel: u8,
-    pub nint: u16,
-    pub nfrac: u32,
+#[cfg(test)]
+#[test]
+fn test_freqsel() {
+    for &(l, h, val) in &FREQSEL_LUT {
+        let freq = (h - l) / 2 + l;
+        assert_eq!(freqsel(freq), Ok(val));
+        let freq = l - 1;
+        assert!(freqsel(freq) != Ok(val));
+        let freq = h + 1;
+        assert!(freqsel(freq) != Ok(val));
+    }
 }
 
 fn freq_to_params(refclk: u32, freq: u32) -> Result<TuningParams> {
@@ -42,9 +54,11 @@ fn freq_to_params(refclk: u32, freq: u32) -> Result<TuningParams> {
     // First, find temporary variable x from the 3 least significant
     // bits of the FREQSEL value:
     let freqsel = freqsel(freq)?;
-    let x = 2u32.pow((freqsel as u32 & 0b111) - 3);
+    let x = 2u32.pow((u32::from(freqsel) & 0b111) - 3);
+    // Use x to calculate NINT and NFRAC:
     let nint = (x * freq) / refclk;
-    let nfrac = 2f64.powi(23) * ((x as f64 * freq as f64) / refclk as f64 - nint as f64);
+    let nfrac =
+        2f64.powi(23) * ((f64::from(x) * f64::from(freq)) / f64::from(refclk) - f64::from(nint));
     Ok(TuningParams {
         freqsel,
         nint: nint as u16,
@@ -53,33 +67,18 @@ fn freq_to_params(refclk: u32, freq: u32) -> Result<TuningParams> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_freqsel() {
-        for &(l, h, val) in &FREQSEL_LUT {
-            let freq = (h - l) / 2 + l;
-            assert_eq!(freqsel(freq), Ok(val));
-            let freq = l - 1;
-            assert!(freqsel(freq) != Ok(val));
-            let freq = h + 1;
-            assert!(freqsel(freq) != Ok(val));
-        }
-    }
-
-    #[test]
-    fn test_freq_to_params() {
-        // The following is from an example from section 3.4.2 of
-        // "LMS6002 – Wide Band Multi Standard Radio Chip - Programming and Calibration Guide"
-        const REFCLK: u32 = 30_720_000;
-        let freq = 2_140_000_000;
-        let TuningParams {
-            freqsel,
-            nint,
-            nfrac,
-        } = freq_to_params(REFCLK, freq).unwrap();
-        assert_eq!(freqsel, 0b100100);
-        assert_eq!(nint, 139);
-        assert_eq!(nfrac, 2708821);
-    }
+#[test]
+fn test_freq_to_params() {
+    // The following is from an example from section 3.4.2 of
+    // "LMS6002 – Wide Band Multi Standard Radio Chip - Programming and Calibration Guide"
+    const REFCLK: u32 = 30_720_000;
+    let freq = 2_140_000_000;
+    let TuningParams {
+        freqsel,
+        nint,
+        nfrac,
+    } = freq_to_params(REFCLK, freq).unwrap();
+    assert_eq!(freqsel, 0b100100);
+    assert_eq!(nint, 139);
+    assert_eq!(nfrac, 2708821);
 }
