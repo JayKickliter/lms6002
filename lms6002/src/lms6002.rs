@@ -1,9 +1,6 @@
-use error::Error;
+use error::*;
 use interface::Interface;
 use reg;
-
-/// The result type returned by `LMS6002` methods.
-pub type Result<T> = ::std::result::Result<T, Error>;
 
 /// A high-level interface for configuring and controlling an LMS6002.
 #[derive(Debug)]

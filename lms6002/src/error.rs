@@ -1,3 +1,6 @@
+/// The result type returned by `LMS6002` methods.
+pub type Result<T> = ::std::result::Result<T, Error>;
+
 /// Error type returned by `LMS6002` methods.
 #[derive(Debug)]
 pub enum Error {
