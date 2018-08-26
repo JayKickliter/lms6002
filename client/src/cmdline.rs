@@ -51,15 +51,7 @@ pub enum Cmd {
 
     /// Direct register manipulation.
     #[structopt(name = "reg")]
-    Reg {
-        #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
-        addr: u8,
-        #[structopt(
-            long = "write", name = "val", parse(try_from_str = "FromHexDecBin::from_hex_dec_bin")
-        )]
-        /// Write val
-        write: Option<u8>,
-    },
+    Reg(RegCmd),
 }
 
 /// High-level commands specific to TX/RX path
@@ -77,4 +69,23 @@ pub enum TRXCmd {
     /// Tune to specified frequency.
     #[structopt(name = "tune")]
     Tune,
+}
+
+/// Low-level register command
+#[derive(Debug, StructOpt)]
+pub enum RegCmd {
+    /// Reads the value out of register at `addr`.
+    #[structopt(name = "read")]
+    Read {
+        #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
+        addr: u8,
+    },
+    /// Writes `val` to register at `addr`.
+    #[structopt(name = "write")]
+    Write {
+        #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
+        addr: u8,
+        #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
+        val: u8,
+    },
 }
