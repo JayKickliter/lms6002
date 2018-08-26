@@ -46,19 +46,18 @@ fn test_freqsel() {
     }
 }
 
-fn freq_to_params(refclk: u32, freq: u32) -> Result<TuningParams> {
+fn freq_to_params(refclk: u32, freq: f64) -> Result<TuningParams> {
     // For wanted LO frequency f_lo and given PLL reference clock
     // frequency f_ref, calculate integer and fractional part of the
     // divider as below.
 
     // First, find temporary variable x from the 3 least significant
     // bits of the FREQSEL value:
-    let freqsel = freqsel(freq)?;
+    let freqsel = freqsel(freq as u32)?;
     let x = 2u32.pow((u32::from(freqsel) & 0b111) - 3);
     // Use x to calculate NINT and NFRAC:
-    let nint = (x * freq) / refclk;
-    let nfrac =
-        2f64.powi(23) * ((f64::from(x) * f64::from(freq)) / f64::from(refclk) - f64::from(nint));
+    let nint = (x * freq as u32) / refclk;
+    let nfrac = 2f64.powi(23) * ((f64::from(x) * freq) / f64::from(refclk) - f64::from(nint));
     Ok(TuningParams {
         freqsel,
         nint: nint as u16,
@@ -72,7 +71,7 @@ fn test_freq_to_params() {
     // The following is from an example from section 3.4.2 of
     // "LMS6002 – Wide Band Multi Standard Radio Chip - Programming and Calibration Guide"
     const REFCLK: u32 = 30_720_000;
-    let freq = 2_140_000_000;
+    let freq = 2_140_000_000.0;
     let TuningParams {
         freqsel,
         nint,
