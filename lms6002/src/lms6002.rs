@@ -66,7 +66,7 @@ impl<I: Interface> LMS6002<I> {
 
     /// Writes a single LMS6002 register.
     pub fn write_reg<T: reg::LmsReg>(&self, reg: T) -> Result<()> {
-        debug!("Writing {:?} to {}", reg, T::addr());
+        debug!("Writing {:?} to 0x{:02x}", reg, T::addr());
         self.write(T::addr(), reg.into())?;
         Ok(())
     }
