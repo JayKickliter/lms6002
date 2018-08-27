@@ -41,15 +41,15 @@ pub struct Opts {
 /// Top-level commands.
 #[derive(Debug, StructOpt)]
 pub enum Cmd {
-    /// Configure the RX path.
+    /// Configure the RX path
     #[structopt(name = "rx")]
     RX(TRXCmd),
 
-    /// Configure the RX path.
+    /// Configure the RX path
     #[structopt(name = "tx")]
     TX(TRXCmd),
 
-    /// Direct register manipulation.
+    /// Direct register manipulation
     #[structopt(name = "reg")]
     Reg(RegCmd),
 }
@@ -57,16 +57,16 @@ pub enum Cmd {
 /// High-level commands specific to TX/RX path
 #[derive(Debug, StructOpt)]
 pub enum TRXCmd {
-    /// Soft-enable this path.
+    /// Soft-enable this path
     #[structopt(name = "enable")]
     Enable,
-    /// Soft-disable this path.
+    /// Soft-disable this path
     #[structopt(name = "disable")]
     Disable,
-    /// Soft-reset this path.
+    /// Soft-reset this path
     #[structopt(name = "reset")]
     Reset,
-    /// Tune to specified frequency.
+    /// Tune to specified frequency
     #[structopt(name = "tune")]
     Tune {
         #[structopt(name = "freq")]
@@ -77,13 +77,13 @@ pub enum TRXCmd {
 /// Low-level register command
 #[derive(Debug, StructOpt)]
 pub enum RegCmd {
-    /// Reads the value out of register at `addr`.
+    /// Read the value out of register at `addr`
     #[structopt(name = "read")]
     Read {
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
         addr: u8,
     },
-    /// Writes `val` to register at `addr`.
+    /// Write `val` to register at `addr`
     #[structopt(name = "write")]
     Write {
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
