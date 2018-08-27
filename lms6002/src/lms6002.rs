@@ -31,29 +31,11 @@ pub enum Path {
 /// Low-level API.
 impl<I: Interface> LMS6002<I> {
     pub fn read(&self, addr: u8) -> Result<u8> {
-        match self.iface.read(addr) {
-            Ok(val) => {
-                debug!("Read 0x{:02x} from 0x{:02x}", val, addr);
-                Ok(val)
-            }
-            Err(_) => {
-                error!("Failed to read LMS register at 0x{:02x}", addr);
-                Err(Error::IO)
-            }
-        }
+        self.iface.read(addr).or(Err(Error::IO))
     }
 
     pub fn write(&self, addr: u8, val: u8) -> Result<()> {
-        match self.iface.write(addr, val) {
-            Ok(_) => {
-                debug!("Wrote 0x{:02x} to 0x{:02x}", val, addr);
-                Ok(())
-            }
-            Err(_) => {
-                error!("Failed to write to LMS register at 0x{:02x}", addr);
-                Err(Error::IO)
-            }
-        }
+        self.iface.write(addr, val).or(Err(Error::IO))
     }
 
     /// Reads a single LMS6002 register.
