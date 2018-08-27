@@ -123,51 +123,49 @@ impl<I: Interface> LMS6002<I> {
     /// Tunes specified `path` to `freq`.
     pub fn tune(&self, path: Path, freq: f64) -> Result<()> {
         let params = algo::freq_to_params(self.clk, freq)?;
-        debug!("Tuning {:?} path to {} using {:?}", path, freq, params);
-        let algo::TuningParams {
-            selvco,
-            frange,
-            nint,
-            nfrac,
-        } = params;
+        info!("Tuning {:?} path to {} using {:?}", path, freq, params);
 
-        use reg::*;
+        fn tune<M: reg::PllMod, N: Interface>(
+            lms: &LMS6002<N>,
+            m: M,
+            params: &algo::TuningParams,
+        ) -> Result<()> {
+            let algo::TuningParams {
+                selvco,
+                frange,
+                nint,
+                nfrac,
+            } = *params;
 
-        let mut pll0 = Pll0x00(0);
-        pll0.set_nint_8_1((nint >> 1) as u8);
+            use reg::*;
 
-        let mut pll1 = Pll0x01(0);
-        pll1.set_nint_0((nint & 1) as u8);
-        pll1.set_nfrac_22_16((nfrac >> 16) as u8);
+            let mut pll0 = Pll0x00(0);
+            pll0.set_nint_8_1((nint >> 1) as u8);
+            lms.write_reg(PllReg::new(pll0, m))?;
 
-        let mut pll2 = Pll0x02(0);
-        pll2.set_nfrac_15_8((nfrac >> 8) as u8);
+            let mut pll1 = Pll0x01(0);
+            pll1.set_nint_0((nint & 1) as u8);
+            pll1.set_nfrac_22_16((nfrac >> 16) as u8);
+            lms.write_reg(PllReg::new(pll1, m))?;
 
-        let mut pll3 = Pll0x03(0);
-        pll3.set_nfrac_7_0(nfrac as u8);
+            let mut pll2 = Pll0x02(0);
+            pll2.set_nfrac_15_8((nfrac >> 8) as u8);
+            lms.write_reg(PllReg::new(pll2, m))?;
+
+            let mut pll3 = Pll0x03(0);
+            pll3.set_nfrac_7_0(nfrac as u8);
+            lms.write_reg(PllReg::new(pll3, m))?;
+
+            lms.rmw_reg(|r: &mut PllReg<Pll0x05, M>| {
+                r.0.set_selvco(selvco);
+                r.0.set_frange(frange);
+            })?;
+            Ok(())
+        }
 
         match path {
-            Path::RX => {
-                self.write_reg(PllReg::new(pll0, RxPll))?;
-                self.write_reg(PllReg::new(pll1, RxPll))?;
-                self.write_reg(PllReg::new(pll2, RxPll))?;
-                self.write_reg(PllReg::new(pll3, RxPll))?;
-                self.rmw_reg(|r: &mut PllReg<Pll0x05, RxPll>| {
-                    r.0.set_selvco(selvco);
-                    r.0.set_frange(frange);
-                })?;
-            }
-            Path::TX => {
-                self.write_reg(PllReg::new(pll0, TxPll))?;
-                self.write_reg(PllReg::new(pll1, TxPll))?;
-                self.write_reg(PllReg::new(pll2, TxPll))?;
-                self.write_reg(PllReg::new(pll3, TxPll))?;
-                self.rmw_reg(|r: &mut PllReg<Pll0x05, TxPll>| {
-                    r.0.set_selvco(selvco);
-                    r.0.set_frange(frange);
-                })?;
-            }
-        };
-        Ok(())
+            Path::RX => tune(self, reg::RxPll, &params),
+            Path::TX => tune(self, reg::TxPll, &params),
+        }
     }
 }
