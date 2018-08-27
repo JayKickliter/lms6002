@@ -143,7 +143,8 @@ impl<I: Interface> LMS6002<I> {
         let params = algo::freq_to_params(self.clk, freq)?;
         debug!("Tuning {:?} path to {} using {:?}", path, freq, params);
         let algo::TuningParams {
-            freqsel: _,
+            selvco,
+            frange,
             nint,
             nfrac,
         } = params;
@@ -169,12 +170,20 @@ impl<I: Interface> LMS6002<I> {
                 self.write_reg(PllReg::new(pll1, RxPll))?;
                 self.write_reg(PllReg::new(pll2, RxPll))?;
                 self.write_reg(PllReg::new(pll3, RxPll))?;
+                self.rmw_reg(|r: &mut PllReg<Pll0x05, RxPll>| {
+                    r.0.set_selvco(selvco);
+                    r.0.set_frange(frange);
+                })?;
             }
             Path::TX => {
                 self.write_reg(PllReg::new(pll0, TxPll))?;
                 self.write_reg(PllReg::new(pll1, TxPll))?;
                 self.write_reg(PllReg::new(pll2, TxPll))?;
                 self.write_reg(PllReg::new(pll3, TxPll))?;
+                self.rmw_reg(|r: &mut PllReg<Pll0x05, TxPll>| {
+                    r.0.set_selvco(selvco);
+                    r.0.set_frange(frange);
+                })?;
             }
         };
         Ok(())
