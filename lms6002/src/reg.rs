@@ -523,7 +523,7 @@ bitfield!{
     /// - 101: Mid low frequency VCO (vco3) (default)
     /// - 110: Mid high frequency VCO (vco2)
     /// - 111: High frequency VCO (vco1)
-    pub selvco, set_selvco: 7, 4;
+    pub selvco, set_selvco: 7, 5;
 
     /// PLL output frequency range selection
     /// - 000: All dividers powered down
