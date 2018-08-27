@@ -1,7 +1,7 @@
 use error::*;
 
 #[derive(Debug)]
-struct TuningParams {
+pub struct TuningParams {
     pub freqsel: u8,
     pub nint: u16,
     pub nfrac: u32,
@@ -46,7 +46,7 @@ fn test_freqsel() {
     }
 }
 
-fn freq_to_params(refclk: u32, freq: f64) -> Result<TuningParams> {
+pub fn freq_to_params(refclk: u32, freq: f64) -> Result<TuningParams> {
     // For wanted LO frequency f_lo and given PLL reference clock
     // frequency f_ref, calculate integer and fractional part of the
     // divider as below.
@@ -56,7 +56,7 @@ fn freq_to_params(refclk: u32, freq: f64) -> Result<TuningParams> {
     let freqsel = freqsel(freq as u32)?;
     let x = 2u32.pow((u32::from(freqsel) & 0b111) - 3);
     // Use x to calculate NINT and NFRAC:
-    let nint = (x * freq as u32) / refclk;
+    let nint = ((x as u64 * freq as u64) / refclk as u64) as u32;
     let nfrac = 2f64.powi(23) * ((f64::from(x) * freq) / f64::from(refclk) - f64::from(nint));
     Ok(TuningParams {
         freqsel,

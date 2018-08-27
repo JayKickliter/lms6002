@@ -394,6 +394,12 @@ impl PllMod for RxPll {
 #[derive(Clone, Copy)]
 pub struct PllReg<R: Debug + Copy, M: PllMod>(pub R, PhantomData<M>);
 
+impl<R: Debug + Copy, M: PllMod> PllReg<R, M> {
+    pub fn new(r: R, _: M) -> Self {
+        PllReg(r, PhantomData)
+    }
+}
+
 macro_rules! pllreg {
     ($reg:tt, $offset:expr) => {
         impl<M: PllMod> ::std::convert::AsRef<$reg> for PllReg<$reg, M> {
@@ -444,7 +450,7 @@ bitfield!{
     impl Debug;
 
     /// Integer part of the divider (LSB)
-    pub nint_0, set_nint_0: 7;
+    pub nint_0, set_nint_0: 7, 7;
 
     /// Fractional part of the divider
     pub nfrac_22_16, set_nfrac_22_16: 6, 0;

@@ -68,7 +68,10 @@ pub enum TRXCmd {
     Reset,
     /// Tune to specified frequency.
     #[structopt(name = "tune")]
-    Tune,
+    Tune {
+        #[structopt(name = "freq")]
+        freq: f64,
+    },
 }
 
 /// Low-level register command

@@ -38,6 +38,9 @@ fn go(opts: Opts) {
         Cmd::TX(TRXCmd::Enable) => lms.trx_enable(Path::TX, true).unwrap(),
         Cmd::RX(TRXCmd::Disable) => lms.trx_enable(Path::RX, false).unwrap(),
         Cmd::TX(TRXCmd::Disable) => lms.trx_enable(Path::TX, false).unwrap(),
+        Cmd::RX(TRXCmd::Tune { freq }) => lms.tune(Path::RX, freq).unwrap(),
+        Cmd::TX(TRXCmd::Tune { freq }) => lms.tune(Path::TX, freq).unwrap(),
+
         cmd => panic!("Unhandled command: {:?}", cmd),
     }
 }

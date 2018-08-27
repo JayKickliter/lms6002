@@ -1,3 +1,4 @@
+use algo;
 use error::*;
 use interface::Interface;
 use reg;
@@ -134,6 +135,48 @@ impl<I: Interface> LMS6002<I> {
                 self.rmw_reg(|r09: &mut reg::Top0x09| r09.set_tx_dsm_spi_clk_en(enable))?;
             }
         }
+        Ok(())
+    }
+
+    /// Tunes specified `path` to `freq`.
+    pub fn tune(&self, path: Path, freq: f64) -> Result<()> {
+        let params = algo::freq_to_params(self.clk, freq)?;
+        debug!("Tuning {:?} path to {} using {:?}", path, freq, params);
+        let algo::TuningParams {
+            freqsel: _,
+            nint,
+            nfrac,
+        } = params;
+
+        use reg::*;
+
+        let mut pll0 = Pll0x00(0);
+        pll0.set_nint_8_1((nint >> 1) as u8);
+
+        let mut pll1 = Pll0x01(0);
+        pll1.set_nint_0((nint & 1) as u8);
+        pll1.set_nfrac_22_16((nfrac >> 16) as u8);
+
+        let mut pll2 = Pll0x02(0);
+        pll2.set_nfrac_15_8((nfrac >> 8) as u8);
+
+        let mut pll3 = Pll0x03(0);
+        pll3.set_nfrac_7_0(nfrac as u8);
+
+        match path {
+            Path::RX => {
+                self.write_reg(PllReg::new(pll0, RxPll))?;
+                self.write_reg(PllReg::new(pll1, RxPll))?;
+                self.write_reg(PllReg::new(pll2, RxPll))?;
+                self.write_reg(PllReg::new(pll3, RxPll))?;
+            }
+            Path::TX => {
+                self.write_reg(PllReg::new(pll0, TxPll))?;
+                self.write_reg(PllReg::new(pll1, TxPll))?;
+                self.write_reg(PllReg::new(pll2, TxPll))?;
+                self.write_reg(PllReg::new(pll3, TxPll))?;
+            }
+        };
         Ok(())
     }
 }
