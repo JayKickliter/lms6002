@@ -1,3 +1,5 @@
+#![allow(non_camel_case_types)]
+
 use std::path::PathBuf;
 
 /// Will attempt to parse an integer from a hex, binary, or decimal
@@ -41,51 +43,39 @@ pub struct Opts {
 /// Top-level commands.
 #[derive(Debug, StructOpt)]
 pub enum Cmd {
-    /// Configure the RX path
-    #[structopt(name = "rx")]
-    RX(TRXCmd),
+    /// Configure the Rx path
+    rx(TRxCmd),
 
-    /// Configure the RX path
-    #[structopt(name = "tx")]
-    TX(TRXCmd),
+    /// Configure the Rx path
+    tx(TRxCmd),
 
     /// Direct register manipulation
-    #[structopt(name = "reg")]
-    Reg(RegCmd),
+    reg(RegCmd),
 }
 
-/// High-level commands specific to TX/RX path
+/// High-level commands specific to Tx/Rx path
 #[derive(Debug, StructOpt)]
-pub enum TRXCmd {
+pub enum TRxCmd {
     /// Soft-enable this path
-    #[structopt(name = "enable")]
-    Enable,
+    enable,
     /// Soft-disable this path
-    #[structopt(name = "disable")]
-    Disable,
+    disable,
     /// Soft-reset this path
-    #[structopt(name = "reset")]
-    Reset,
+    reset,
     /// Tune to specified frequency
-    #[structopt(name = "tune")]
-    Tune {
-        #[structopt(name = "freq")]
-        freq: f64,
-    },
+    tune { freq: f64 },
 }
 
 /// Low-level register command
 #[derive(Debug, StructOpt)]
 pub enum RegCmd {
     /// Read the value out of register at `addr`
-    #[structopt(name = "read")]
-    Read {
+    read {
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
         addr: u8,
     },
     /// Write `val` to register at `addr`
-    #[structopt(name = "write")]
-    Write {
+    write {
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
         addr: u8,
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]

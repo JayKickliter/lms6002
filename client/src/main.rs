@@ -14,7 +14,7 @@ use structopt::StructOpt;
 
 fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) {
     match *cmd {
-        RegCmd::Read { addr } => {
+        RegCmd::read { addr } => {
             let val = lms.read(addr).unwrap();
             println!(
                 "0x{:02x}: {:#?}",
@@ -22,7 +22,7 @@ fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) {
                 lms6002::reg::into_debug(addr, val).unwrap()
             );
         }
-        RegCmd::Write { addr, val } => {
+        RegCmd::write { addr, val } => {
             lms.write(addr, val).unwrap();
         }
     }
@@ -33,13 +33,13 @@ fn go(opts: Opts) {
     let iface = interface::Interface::open(opts.dev).unwrap();
     let lms = lms6002::LMS6002::new(iface, 40_000_000);
     match opts.cmd {
-        Cmd::Reg(cmd) => reg_cmd(&lms, &cmd),
-        Cmd::RX(TRXCmd::Enable) => lms.trx_enable(Path::RX, true).unwrap(),
-        Cmd::TX(TRXCmd::Enable) => lms.trx_enable(Path::TX, true).unwrap(),
-        Cmd::RX(TRXCmd::Disable) => lms.trx_enable(Path::RX, false).unwrap(),
-        Cmd::TX(TRXCmd::Disable) => lms.trx_enable(Path::TX, false).unwrap(),
-        Cmd::RX(TRXCmd::Tune { freq }) => lms.tune(Path::RX, freq).unwrap(),
-        Cmd::TX(TRXCmd::Tune { freq }) => lms.tune(Path::TX, freq).unwrap(),
+        Cmd::reg(cmd) => reg_cmd(&lms, &cmd),
+        Cmd::rx(TRxCmd::enable) => lms.trx_enable(Path::RX, true).unwrap(),
+        Cmd::tx(TRxCmd::enable) => lms.trx_enable(Path::TX, true).unwrap(),
+        Cmd::rx(TRxCmd::disable) => lms.trx_enable(Path::RX, false).unwrap(),
+        Cmd::tx(TRxCmd::disable) => lms.trx_enable(Path::TX, false).unwrap(),
+        Cmd::rx(TRxCmd::tune { freq }) => lms.tune(Path::RX, freq).unwrap(),
+        Cmd::tx(TRxCmd::tune { freq }) => lms.tune(Path::TX, freq).unwrap(),
 
         cmd => panic!("Unhandled command: {:?}", cmd),
     }
