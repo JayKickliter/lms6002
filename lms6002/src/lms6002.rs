@@ -158,7 +158,10 @@ impl<I: Interface> LMS6002<I> {
                     debug!("VCO {:?} locked, selected", vco);
                     return Ok(());
                 } else {
-                    debug!("VCO {:?} did not lock, continuing", vco);
+                    debug!(
+                        "VCO {:?} did not lock. VCO00: {:?}, VCO63: {:?} ",
+                        vco, c00_vtune, c63_vtune
+                    );
                 }
             }
             Err(Error::Range)
