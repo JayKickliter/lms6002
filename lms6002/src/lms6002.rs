@@ -127,14 +127,14 @@ impl<I: Interface> LMS6002<I> {
 
         use reg::*;
 
+        fn sleep() {
+            ::std::thread::sleep(::std::time::Duration::from_millis(1));
+        }
+
         fn select_vco<M: reg::PllMod, N: Interface>(lms: &LMS6002<N>, _m: M) -> Result<()> {
             info!("Selecting VCO");
             use reg::SelVco::*;
             for vco in &[Vco4, Vco3, Vco2, Vco1] {
-                let sleep = || {
-                    ::std::thread::sleep(::std::time::Duration::from_millis(1));
-                };
-
                 debug!("Trying vco {:?}", vco);
 
                 // Set VCO
@@ -175,6 +175,63 @@ impl<I: Interface> LMS6002<I> {
             Err(Error::Range)
         }
 
+        fn select_vcocap<M: reg::PllMod, N: Interface>(lms: &LMS6002<N>, _m: M) -> Result<()> {
+            info!("Selecting VCOCAP");
+            use reg::VTune::*;
+
+            let set_vcocap = |val: u8| -> Result<()> {
+                debug!("Trying VCOCAP {:2}", val);
+                lms.rmw_reg(|r: &mut PllReg<Pll0x09, M>| {
+                    r.0.set_vcocap(val);
+                })?;
+                Ok(())
+            };
+            let read_vtune = || -> Result<VTune> {
+                let vtune = lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune();
+                Ok(vtune)
+            };
+
+            let mut capval_low: Option<u8> = None;
+            let mut capval_high: Option<u8> = None;
+
+            // Cycle through all possible VCOCAP values and record VCOCAP values
+            // when VTune transitions:
+            // - `capval_low`: `High` -> `InRange`
+            // - `capval_high`: `InRange` -> `Low`
+            for capval in 0..64 {
+                set_vcocap(capval)?;
+                match (capval_low, capval_high, read_vtune()?) {
+                    (None, None, High) => (),
+                    t @ (None, None, InRange) => {
+                        debug!("VTune transitioned to {:?}", t.2);
+                        capval_low = Some(capval);
+                    }
+                    (Some(_), None, InRange) => continue,
+                    t @ (Some(_), None, Low) => {
+                        debug!("VTune transitioned to {:?}", t.2);
+                        capval_high = Some(capval);
+                        break;
+                    }
+                    t => {
+                        error!("Breaking: {:?}", t);
+                        break;
+                    }
+                }
+            }
+
+            if let (Some(capval_low), Some(capval_high)) = (capval_low, capval_high) {
+                let capval_middle = (capval_low + capval_high) / 2;
+                debug!(
+                    "Selected VCOCAP {:2} (Low: {:2} High: {:2})",
+                    capval_middle, capval_low, capval_high
+                );
+                Ok(())
+            } else {
+                error!("Failed to find a suitable VCOCAP value");
+                Err(Error::Range)
+            }
+        }
+
         fn tune<M: reg::PllMod, N: Interface>(
             lms: &LMS6002<N>,
             m: M,
@@ -210,6 +267,7 @@ impl<I: Interface> LMS6002<I> {
             })?;
 
             select_vco(lms, m)?;
+            select_vcocap(lms, m)?;
 
             Ok(())
         }

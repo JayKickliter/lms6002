@@ -721,9 +721,9 @@ pllreg!(Pll0x09, 0x09);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VTune {
-    Low,  // 0b10
-    Ok,   // 0b00
-    High, // 0b01
+    Low,     // 0b10
+    InRange, // 0b00
+    High,    // 0b01
     Inv(u8),
 }
 
@@ -731,7 +731,7 @@ impl From<u8> for VTune {
     fn from(val: u8) -> VTune {
         match val {
             0b01 => VTune::Low,
-            0b00 => VTune::Ok,
+            0b00 => VTune::InRange,
             0b10 => VTune::High,
             inv => VTune::Inv(inv),
         }
@@ -742,7 +742,7 @@ impl From<VTune> for u8 {
     fn from(val: VTune) -> u8 {
         match val {
             VTune::Low => 0b01,
-            VTune::Ok => 0b00,
+            VTune::InRange => 0b00,
             VTune::High => 0b10,
             VTune::Inv(inv) => inv,
         }
