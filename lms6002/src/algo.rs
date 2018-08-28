@@ -37,6 +37,7 @@ fn freqsel(freq: u32) -> Result<(SelVco, FRange)> {
         .map(|&(_, _, val)| val)
         .ok_or(Error::Range)
 }
+
 #[cfg(test)]
 #[test]
 fn test_freqsel() {

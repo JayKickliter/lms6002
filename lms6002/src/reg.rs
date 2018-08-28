@@ -902,3 +902,12 @@ pub fn into_debug(addr: u8, val: u8) -> Result<Box<Debug>, ()> {
         _ => return Err(()),
     })
 }
+
+#[cfg(test)]
+quickcheck! {
+    fn prop_into_debug(addr: u8, val: u8) -> bool {
+        let res = into_debug(addr, val);
+        let _ = format!("{:?}", res);
+        ((addr >= 128) && res.is_err()) || ((addr < 128) && res.is_ok())
+    }
+}
