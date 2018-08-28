@@ -164,7 +164,7 @@ impl<I: Interface> LMS6002<I> {
                     );
                 }
             }
-            Err(Error::Range)
+            Err(Error::Pll(PllError::VcoSel))
         }
 
         fn select_vcocap<M: reg::PllMod, N: Interface>(lms: &LMS6002<N>, _m: M) -> Result<()> {
@@ -220,7 +220,7 @@ impl<I: Interface> LMS6002<I> {
                 Ok(())
             } else {
                 error!("Failed to find a suitable VCOCAP value");
-                Err(Error::Range)
+                Err(Error::Pll(PllError::VcoCapSel))
             }
         }
 

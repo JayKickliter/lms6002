@@ -9,4 +9,13 @@ pub enum Error {
     Io,
     /// A parameter is not in range.
     Range,
+    /// PLL related error.
+    Pll(PllError),
+}
+
+/// An error indicating failure to find suitable PLL parameters.
+#[derive(Debug, PartialEq, Eq)]
+pub enum PllError {
+    VcoSel,
+    VcoCapSel,
 }
