@@ -719,6 +719,36 @@ bitfield!{
 }
 pllreg!(Pll0x09, 0x09);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum VTune {
+    Low,  // 0b10
+    Ok,   // 0b00
+    High, // 0b01
+    Inv(u8),
+}
+
+impl From<u8> for VTune {
+    fn from(val: u8) -> VTune {
+        match val {
+            0b10 => VTune::Low,  //
+            0b00 => VTune::Ok,   //
+            0b01 => VTune::High, //
+            inv => VTune::Inv(inv),
+        }
+    }
+}
+
+impl From<VTune> for u8 {
+    fn from(val: VTune) -> u8 {
+        match val {
+            VTune::Low => 0b10,
+            VTune::Ok => 0b00,
+            VTune::High => 0b01,
+            VTune::Inv(inv) => inv,
+        }
+    }
+}
+
 bitfield!{
     #[derive(Clone, Copy)]
     pub struct Pll0x0A(u8);
@@ -729,6 +759,9 @@ bitfield!{
 
     /// Value from Vtune comparator (Read Only)
     pub vtune_l, _: 6;
+
+    /// Combination of [`vtune_h`] [`vtune_l`] in a single type
+    pub u8, into VTune, vtune, _: 7, 6;
 }
 pllreg!(Pll0x0A, 0x0A);
 

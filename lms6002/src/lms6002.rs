@@ -125,6 +125,8 @@ impl<I: Interface> LMS6002<I> {
         let params = algo::freq_to_params(self.clk, freq)?;
         info!("Tuning {:?} path to {} using {:?}", path, freq, params);
 
+        use reg::*;
+
         fn tune<M: reg::PllMod, N: Interface>(
             lms: &LMS6002<N>,
             m: M,
@@ -136,8 +138,6 @@ impl<I: Interface> LMS6002<I> {
                 nint,
                 nfrac,
             } = *params;
-
-            use reg::*;
 
             let mut pll0 = Pll0x00(0);
             pll0.set_nint_8_1((nint >> 1) as u8);
@@ -161,6 +161,16 @@ impl<I: Interface> LMS6002<I> {
                 r.0.set_frange(frange.into());
             })?;
             Ok(())
+        }
+
+        fn select_vco<M: reg::PllMod, N: Interface>(lms: &LMS6002<N>, m: M) -> Result<()> {
+            info!("Selecting VCO");
+            use reg::SelVco::*;
+            for selvco in &[Vco4, Vco3, Vco2, Vco1] {
+                lms.rmw_reg(|r: &mut PllReg<Pll0x05, M>| {
+                    r.0.set_selvco((*selvco).into());
+                })?;
+            }
         }
 
         match path {
