@@ -512,6 +512,70 @@ bitfield!{
 }
 pllreg!(Pll0x04, 0x04);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum SelVco {
+    Off = 0b000,
+    Vco4 = 0b100,
+    Vco3 = 0b101,
+    Vco2 = 0b110,
+    Vco1 = 0b111,
+}
+
+impl From<SelVco> for u8 {
+    fn from(val: SelVco) -> u8 {
+        val as u8
+    }
+}
+
+impl From<u8> for SelVco {
+    fn from(val: u8) -> SelVco {
+        match val {
+            0b000 => SelVco::Off,
+            0b100 => SelVco::Vco4,
+            0b101 => SelVco::Vco3,
+            0b110 => SelVco::Vco2,
+            0b111 => SelVco::Vco1,
+            _ => panic!(
+                "Invalid cast from SELVCO register value (0b{:03b}) to SelVco type",
+                val
+            ),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum FRange {
+    Off = 0b000,
+    VcoDiv2 = 0b100,
+    VcoDiv4 = 0b101,
+    VcoDiv8 = 0b110,
+    VcoDiv16 = 0b111,
+}
+
+impl From<FRange> for u8 {
+    fn from(val: FRange) -> u8 {
+        val as u8
+    }
+}
+
+impl From<u8> for FRange {
+    fn from(val: u8) -> FRange {
+        match val {
+            0b000 => FRange::Off,
+            0b100 => FRange::VcoDiv2,
+            0b101 => FRange::VcoDiv4,
+            0b110 => FRange::VcoDiv8,
+            0b111 => FRange::VcoDiv16,
+            _ => panic!(
+                "Invalid cast from FRANGE register value (0b{:03b}) to FRange type",
+                val
+            ),
+        }
+    }
+}
+
 bitfield!{
     #[derive(Clone, Copy)]
     pub struct Pll0x05(u8);
@@ -523,7 +587,7 @@ bitfield!{
     /// - 101: Mid low frequency VCO (vco3) (default)
     /// - 110: Mid high frequency VCO (vco2)
     /// - 111: High frequency VCO (vco1)
-    pub selvco, set_selvco: 7, 5;
+    pub u8, into SelVco, selvco, set_selvco: 7, 5;
 
     /// PLL output frequency range selection
     /// - 000: All dividers powered down
@@ -531,7 +595,7 @@ bitfield!{
     /// - 101: Fvco/4 (1-2GHz range)
     /// - 110: Fvco/8 (0.5-1GHz range)
     /// - 111: Fvco/16 (0.25-0.5GHz range)
-    pub frange, set_frange: 4, 2;
+    pub u8, into FRange, frange, set_frange: 4, 2;
 
     /// Select output buffer in RX PLL, not used in TX PLL
     /// - 00: All output buffers powered down

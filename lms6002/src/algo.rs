@@ -1,33 +1,36 @@
+use self::FRange::*;
+use self::SelVco::*;
 use error::*;
+use reg::{FRange, SelVco};
 
 #[derive(Debug)]
 pub struct TuningParams {
-    pub selvco: u8,
-    pub frange: u8,
+    pub selvco: SelVco,
+    pub frange: FRange,
     pub nint: u16,
     pub nfrac: u32,
 }
 
-const FREQSEL_LUT: [(u32, u32, (u8, u8)); 16] = [
-    (232_500_000, 285_625_000, (0b100, 0b111)),
-    (285_625_000, 336_875_000, (0b101, 0b111)),
-    (336_875_000, 405_000_000, (0b110, 0b111)),
-    (405_000_000, 465_000_000, (0b111, 0b111)),
-    (465_000_000, 571_250_000, (0b100, 0b110)),
-    (571_250_000, 673_750_000, (0b101, 0b110)),
-    (673_750_000, 810_000_000, (0b110, 0b110)),
-    (810_000_000, 930_000_000, (0b111, 0b110)),
-    (930_000_000, 1_142_500_000, (0b100, 0b101)),
-    (1_142_500_000, 1_347_500_000, (0b101, 0b101)),
-    (1_347_500_000, 1_620_000_000, (0b110, 0b101)),
-    (1_620_000_000, 1_860_000_000, (0b111, 0b101)),
-    (1_860_000_000, 2_285_000_000, (0b100, 0b100)),
-    (2_285_000_000, 2_695_000_000, (0b101, 0b100)),
-    (2_695_000_000, 3_240_000_000, (0b110, 0b100)),
-    (3_240_000_000, 3_720_000_000, (0b111, 0b100)),
+const FREQSEL_LUT: [(u32, u32, (SelVco, FRange)); 16] = [
+    (232_500_000, 285_625_000, (Vco4, VcoDiv16)),
+    (285_625_000, 336_875_000, (Vco3, VcoDiv16)),
+    (336_875_000, 405_000_000, (Vco2, VcoDiv16)),
+    (405_000_000, 465_000_000, (Vco1, VcoDiv16)),
+    (465_000_000, 571_250_000, (Vco4, VcoDiv8)),
+    (571_250_000, 673_750_000, (Vco3, VcoDiv8)),
+    (673_750_000, 810_000_000, (Vco2, VcoDiv8)),
+    (810_000_000, 930_000_000, (Vco1, VcoDiv8)),
+    (930_000_000, 1_142_500_000, (Vco4, VcoDiv4)),
+    (1_142_500_000, 1_347_500_000, (Vco3, VcoDiv4)),
+    (1_347_500_000, 1_620_000_000, (Vco2, VcoDiv4)),
+    (1_620_000_000, 1_860_000_000, (Vco1, VcoDiv4)),
+    (1_860_000_000, 2_285_000_000, (Vco4, VcoDiv2)),
+    (2_285_000_000, 2_695_000_000, (Vco3, VcoDiv2)),
+    (2_695_000_000, 3_240_000_000, (Vco2, VcoDiv2)),
+    (3_240_000_000, 3_720_000_000, (Vco1, VcoDiv2)),
 ];
 
-fn freqsel(freq: u32) -> Result<(u8, u8)> {
+fn freqsel(freq: u32) -> Result<(SelVco, FRange)> {
     FREQSEL_LUT
         .iter()
         .find(|&&(l, h, _)| l < freq && freq < h)
@@ -55,7 +58,7 @@ pub fn freq_to_params(refclk: u32, freq: f64) -> Result<TuningParams> {
     // First, find temporary variable x from the 3 least significant
     // bits of the FREQSEL value:
     let (selvco, frange) = freqsel(freq as u32)?;
-    let x = 2u32.pow((u32::from(frange) & 0b111) - 3);
+    let x = 2u32.pow((u32::from(u8::from(frange))) - 3);
     // Use x to calculate NINT and NFRAC:
     let nint = ((u64::from(x) * freq as u64) / u64::from(refclk)) as u32;
     let nfrac = 2f64.powi(23) * ((f64::from(x) * freq) / f64::from(refclk) - f64::from(nint));
@@ -80,8 +83,8 @@ fn test_freq_to_params() {
         nint,
         nfrac,
     } = freq_to_params(REFCLK, freq).unwrap();
-    assert_eq!(selvco, 0b100);
-    assert_eq!(frange, 0b100);
+    assert_eq!(selvco, SelVco::from(0b100));
+    assert_eq!(frange, FRange::from(0b100));
     assert_eq!(nint, 139);
     assert_eq!(nfrac, 2708821);
 }

@@ -157,8 +157,8 @@ impl<I: Interface> LMS6002<I> {
             lms.write_reg(PllReg::new(pll3, m))?;
 
             lms.rmw_reg(|r: &mut PllReg<Pll0x05, M>| {
-                r.0.set_selvco(selvco);
-                r.0.set_frange(frange);
+                r.0.set_selvco(selvco.into());
+                r.0.set_frange(frange.into());
             })?;
             Ok(())
         }
