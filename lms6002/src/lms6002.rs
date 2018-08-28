@@ -127,6 +127,43 @@ impl<I: Interface> LMS6002<I> {
 
         use reg::*;
 
+        fn select_vco<M: reg::PllMod, N: Interface>(lms: &LMS6002<N>, _m: M) -> Result<()> {
+            info!("Selecting VCO");
+            use reg::SelVco::*;
+            for vco in &[Vco4, Vco3, Vco2, Vco1] {
+                debug!("Trying vco {:?}", vco);
+
+                // Set VCO
+                lms.rmw_reg(|r: &mut PllReg<Pll0x05, M>| {
+                    r.0.set_selvco((*vco).into());
+                })?;
+
+                // Set VCOCAP to 0 and read out VTUNE
+                let c00_vtune = {
+                    lms.rmw_reg(|r: &mut PllReg<Pll0x09, M>| {
+                        r.0.set_vcocap(0);
+                    })?;
+                    lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune()
+                };
+
+                // Set VCOCAP to 63 and read out VTUNE
+                let c63_vtune = {
+                    lms.rmw_reg(|r: &mut PllReg<Pll0x09, M>| {
+                        r.0.set_vcocap(63);
+                    })?;
+                    lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune()
+                };
+
+                if c00_vtune == VTune::High && c63_vtune == VTune::Low {
+                    debug!("VCO {:?} locked, selected", vco);
+                    return Ok(());
+                } else {
+                    debug!("VCO {:?} did not lock, continuing", vco);
+                }
+            }
+            Err(Error::Range)
+        }
+
         fn tune<M: reg::PllMod, N: Interface>(
             lms: &LMS6002<N>,
             m: M,
@@ -160,17 +197,10 @@ impl<I: Interface> LMS6002<I> {
                 r.0.set_selvco(selvco.into());
                 r.0.set_frange(frange.into());
             })?;
-            Ok(())
-        }
 
-        fn select_vco<M: reg::PllMod, N: Interface>(lms: &LMS6002<N>, m: M) -> Result<()> {
-            info!("Selecting VCO");
-            use reg::SelVco::*;
-            for selvco in &[Vco4, Vco3, Vco2, Vco1] {
-                lms.rmw_reg(|r: &mut PllReg<Pll0x05, M>| {
-                    r.0.set_selvco((*selvco).into());
-                })?;
-            }
+            select_vco(lms, m)?;
+
+            Ok(())
         }
 
         match path {
