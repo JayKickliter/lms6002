@@ -513,18 +513,25 @@ bitfield!{
 pllreg!(Pll0x04, 0x04);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
 pub enum SelVco {
-    Off = 0b000,
-    Vco4 = 0b100,
-    Vco3 = 0b101,
-    Vco2 = 0b110,
-    Vco1 = 0b111,
+    Off,
+    Vco4,
+    Vco3,
+    Vco2,
+    Vco1,
+    Inv(u8),
 }
 
 impl From<SelVco> for u8 {
     fn from(val: SelVco) -> u8 {
-        val as u8
+        match val {
+            SelVco::Off => 0b000,
+            SelVco::Vco4 => 0b100,
+            SelVco::Vco3 => 0b101,
+            SelVco::Vco2 => 0b110,
+            SelVco::Vco1 => 0b111,
+            SelVco::Inv(inv) => inv,
+        }
     }
 }
 
@@ -536,27 +543,31 @@ impl From<u8> for SelVco {
             0b101 => SelVco::Vco3,
             0b110 => SelVco::Vco2,
             0b111 => SelVco::Vco1,
-            _ => panic!(
-                "Invalid cast from SELVCO register value (0b{:03b}) to SelVco type",
-                val
-            ),
+            inv => SelVco::Inv(inv),
         }
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
 pub enum FRange {
-    Off = 0b000,
-    VcoDiv2 = 0b100,
-    VcoDiv4 = 0b101,
-    VcoDiv8 = 0b110,
-    VcoDiv16 = 0b111,
+    Off,      // 0b000,
+    VcoDiv2,  // 0b100,
+    VcoDiv4,  // 0b101,
+    VcoDiv8,  // 0b110,
+    VcoDiv16, // 0b111,
+    Inv(u8),
 }
 
 impl From<FRange> for u8 {
     fn from(val: FRange) -> u8 {
-        val as u8
+        match val {
+            FRange::Off => 0b000,
+            FRange::VcoDiv2 => 0b100,
+            FRange::VcoDiv4 => 0b101,
+            FRange::VcoDiv8 => 0b110,
+            FRange::VcoDiv16 => 0b111,
+            FRange::Inv(inv) => inv,
+        }
     }
 }
 
@@ -568,10 +579,7 @@ impl From<u8> for FRange {
             0b101 => FRange::VcoDiv4,
             0b110 => FRange::VcoDiv8,
             0b111 => FRange::VcoDiv16,
-            _ => panic!(
-                "Invalid cast from FRANGE register value (0b{:03b}) to FRange type",
-                val
-            ),
+            inv => FRange::Inv(inv),
         }
     }
 }
