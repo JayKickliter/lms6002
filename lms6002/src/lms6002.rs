@@ -131,6 +131,11 @@ impl<I: Interface> LMS6002<I> {
             info!("Selecting VCO");
             use reg::SelVco::*;
             for vco in &[Vco4, Vco3, Vco2, Vco1] {
+                let sleep = || {
+                    use std::{thread, time};
+                    thread::sleep(time::Duration::from_millis(1));
+                };
+
                 debug!("Trying vco {:?}", vco);
 
                 // Set VCO
@@ -138,11 +143,14 @@ impl<I: Interface> LMS6002<I> {
                     r.0.set_selvco((*vco).into());
                 })?;
 
+                sleep();
+
                 // Set VCOCAP to 0 and read out VTUNE
                 let c00_vtune = {
                     lms.rmw_reg(|r: &mut PllReg<Pll0x09, M>| {
                         r.0.set_vcocap(0);
                     })?;
+                    sleep();
                     lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune()
                 };
 
@@ -151,6 +159,7 @@ impl<I: Interface> LMS6002<I> {
                     lms.rmw_reg(|r: &mut PllReg<Pll0x09, M>| {
                         r.0.set_vcocap(63);
                     })?;
+                    sleep();
                     lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune()
                 };
 
