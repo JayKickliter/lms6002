@@ -132,8 +132,7 @@ impl<I: Interface> LMS6002<I> {
             use reg::SelVco::*;
             for vco in &[Vco4, Vco3, Vco2, Vco1] {
                 let sleep = || {
-                    use std::{thread, time};
-                    thread::sleep(time::Duration::from_millis(1));
+                    ::std::thread::sleep(::std::time::Duration::from_millis(1));
                 };
 
                 debug!("Trying vco {:?}", vco);
