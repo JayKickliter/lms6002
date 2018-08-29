@@ -258,15 +258,24 @@ impl<I: Interface> LMS6002<I> {
                 r.0.set_frange(frange.into());
             })?;
 
-            select_vco(lms, m)?;
-            select_vcocap(lms, m)?;
-
             Ok(())
         }
 
         match path {
-            Path::RX => tune(self, reg::RxPll, &params),
-            Path::TX => tune(self, reg::TxPll, &params),
+            Path::RX => {
+                let pll_mod = reg::RxPll;
+                tune(self, pll_mod, &params)?;
+                select_vco(self, pll_mod)?;
+                select_vcocap(self, pll_mod)?;
+            }
+            Path::TX => {
+                let pll_mod = reg::TxPll;
+                tune(self, pll_mod, &params)?;
+                select_vco(self, pll_mod)?;
+                select_vcocap(self, pll_mod)?;
+            }
         }
+
+        Ok(())
     }
 }
