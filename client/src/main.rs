@@ -33,7 +33,7 @@ fn try_main(opts: Opts) -> error::Result {
     use lms6002::Path;
     let iface = interface::Interface::open(opts.dev)?;
     let lms = lms6002::LMS6002::new(iface, 40_000_000);
-    let _: () = match opts.cmd {
+    match opts.cmd {
         Cmd::reg(cmd) => reg_cmd(&lms, &cmd)?,
         Cmd::rx(TRxCmd::enable) => lms.trx_enable(Path::RX, true)?,
         Cmd::tx(TRxCmd::enable) => lms.trx_enable(Path::TX, true)?,

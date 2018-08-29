@@ -24,9 +24,9 @@ impl From<lms6002::Error> for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &Error::Io(_) => write!(f, "IO"),
-            &Error::Lms(_) => write!(f, "LMS6002"),
+        match *self {
+            Error::Io(_) => write!(f, "IO"),
+            Error::Lms(_) => write!(f, "LMS6002"),
         }
     }
 }
