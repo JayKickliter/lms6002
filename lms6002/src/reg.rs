@@ -1052,7 +1052,7 @@ struct Reserved(u8);
 ///
 /// This a weak form of up-casting.
 #[cfg(feature = "std")]
-pub fn into_debug(addr: u8, val: u8) -> Result<Box<Debug>, ()> {
+pub fn into_debug(addr: u8, val: u8) -> ::error::Result<Box<Debug>> {
     Ok(match addr {
         ////////////////////////////////////////////////////////////////////
         // Top-level                                                      //
@@ -1207,7 +1207,7 @@ pub fn into_debug(addr: u8, val: u8) -> Result<Box<Debug>, ()> {
         // 0x7E
         // 0x7F
         addr if addr < 128 => Box::new(val),
-        _ => return Err(()),
+        _ => return Err(::error::Error::Range),
     })
 }
 
