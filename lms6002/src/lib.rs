@@ -1,6 +1,10 @@
 #![deny(unsafe_code)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(test)]
+#[cfg(not(feature = "std"))]
+extern crate core as std;
+
+#[cfg(all(test, feature = "std"))]
 #[macro_use]
 extern crate quickcheck;
 

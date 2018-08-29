@@ -1051,6 +1051,7 @@ struct Reserved(u8);
 /// pair.
 ///
 /// This a weak form of up-casting.
+#[cfg(feature = "std")]
 pub fn into_debug(addr: u8, val: u8) -> Result<Box<Debug>, ()> {
     Ok(match addr {
         ////////////////////////////////////////////////////////////////////
@@ -1210,7 +1211,7 @@ pub fn into_debug(addr: u8, val: u8) -> Result<Box<Debug>, ()> {
     })
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 quickcheck! {
     fn prop_into_debug(addr: u8, val: u8) -> bool {
         let res = into_debug(addr, val);
