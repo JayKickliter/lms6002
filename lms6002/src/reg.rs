@@ -22,6 +22,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 
 pub use self::pll::*;
+pub use self::rxfe::*;
 pub use self::top::*;
 
 pub trait LmsReg: Debug + From<u8> + Into<u8> + Copy {
@@ -787,6 +788,261 @@ mod pll {
     pllreg!(Pll0x0B, 0x0B);
 }
 
+mod rxfe {
+    ////////////////////////////////////////////////////////////////////////
+    // RX Frontend Registers                                              //
+    ////////////////////////////////////////////////////////////////////////
+    use super::*;
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x70(u8);
+        impl Debug;
+
+        /// DECODE
+        /// - 0: Decode control signals. (Default)
+        /// - 1: Use control signals from test mode registers.
+        pub decode, set_decode: 1;
+
+        /// EN: RXFE modules enable.
+        /// - 0: Top modules powered down
+        /// - 1: Top modules enabled (Default)
+        pub en, set_en: 0;
+    }
+    lmsreg!(RxFe0x70, 0x70);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x71(u8);
+        impl Debug;
+
+        /// Selects the input to the mixer.
+        /// - 1: Input 1 is selected, shorted on-chip to LNA internal output. (Default)
+        /// - 0: Input 2 is selected, connected to pads.
+        pub in1sel_mix_rxfe, set_in1sel_mix_rxfe: 7;
+
+        /// DC offset cancellation, I channel.
+        /// - Code is Sign(<6>)-Magnitude(<5:0>), signed magnitude format.
+        /// - 0000000: (Default)
+        pub dcoff_i_rxfe, set_dcoff_i_rxfe: 6, 0;
+    }
+    lmsreg!(RxFe0x71, 0x71);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x72(u8);
+        impl Debug;
+
+        /// To select the internal load for the LNA.
+        /// - 1: Internal load is active. (Default)
+        /// - 0: Internal load is disabled.
+        pub inload_lna_rxfe, set_inload_lna_rxfe: 7;
+
+        /// DC offset cancellation, Q channel.
+        /// - Code is Sign(<6>)-Magnitude(<5:0>), signed magnitude format.
+        /// - 0000000: (Default)
+        pub dcoff_q_rxfe, set_dcoff_q_rxfe: 6, 0;
+
+    }
+    lmsreg!(RxFe0x72, 0x72);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x73(u8);
+        impl Debug;
+
+        /// To select the external load for the LNA.
+        /// - 1: External load is active.
+        /// - 0: External load is disabled. (Default)
+        pub xload_lna_rxfe, set_xload_lna_rxfe: 7;
+
+        /// IP2 cancellation, I channel.
+        /// - Code is Sign(<6>)-Magnitude(<5:0>), signed magnitude format.
+        /// - 0000000: (Default)
+        pub ip2trim_i_rxfe, set_ip2trim_i_rxfe: 6, 0;
+    }
+    lmsreg!(RxFe0x73, 0x73);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x75(u8);
+        impl Debug;
+
+        /// LNA gain mode control.
+        /// - 11: Max gain (all LNAs). (Default)
+        /// - 10: Mid gain (all LNAs).
+        /// - 01: LNA bypassed (LNA1 and LNA2).
+        /// - 00: Max gain (LNA3).
+        pub g_lna_rxfe, set_g_lna_rxfe: 7, 6;
+
+        /// Selects the active LNA.
+        /// - 00: All LNAs disabled.
+        /// - 01: LNA1 active. (Default)
+        /// - 10: LNA2 active.
+        /// - 11: LNA3 active.
+        pub lnasel_rxfe, set_lnasel_rxfe: 5, 4;
+
+        /// Controls the capacitance parallel to the BE of the input NPN transistors.
+        ///
+        /// To be used at lower frequencies for easier matching.
+        ///
+        /// **NOTE**: For LNA1 and LNA2 only.
+        /// - 0000: (Default)
+        pub cbe_lna_rxfe, set_cbe_lna_rxfe: 3, 0;
+
+    }
+    lmsreg!(RxFe0x75, 0x75);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x76(u8);
+        impl Debug;
+
+        /// Feedback resistor control of the TIA (RXVGA1) to set the mixer gain.
+        /// - If = 120 --> mixer gain = 30dB (Default)
+        /// - If = 102 --> mixer gain = 19dB
+        /// - If = 2 --> mixer gain = 5dB
+        pub rfb_tia_rxfe, set_rfb_tia_rxfe: 6, 0;
+    }
+    lmsreg!(RxFe0x76, 0x76);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x77(u8);
+        impl Debug;
+
+        /// Feedback capacitor for the TIA (RXVGA1) to limit the BW.
+        /// - If = 0, min cap --> BW~45MHz for gain of 30dB. (Default)
+        /// - If = 19 --> BW=2.5MHz for MixGain=30dB and at TT.
+        ///
+        /// This cap is supposed to be set according to the RC time
+        /// constant to have almost constant BW over the corners for
+        /// optimum CDMA performance. Software will control it using
+        /// the information from the LPF calibration circuit.
+        pub cfb_tia_rxfe, set_cfb_tia_rxfe: 6, 0;
+    }
+    lmsreg!(RxFe0x77, 0x77);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x78(u8);
+        impl Debug;
+
+        /// Controls the on-chip LNA load resistor for the external load mode of the LNA.
+        ///
+        /// In practice, this will be set to high value, the output
+        /// will be ac coupled, and the actual load is defined on PCB.
+        ///
+        /// - 011100: (Default)
+        pub rdlext_lna_rxfe, set_rdlext_lna_rxfe: 5, 0;
+
+    }
+    lmsreg!(RxFe0x78, 0x78);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x79(u8);
+        impl Debug;
+
+        /// Controls the on-chip LNA load resistor for the internal
+        /// load mode of the LNA, LNA1 and LNA2.
+        /// - 011100: (Default)
+        pub rdlint_lna_rxfe, set_rdlint_lna_rxfe: 5, 0;
+    }
+    lmsreg!(RxFe0x79, 0x79);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x7A(u8);
+        impl Debug;
+
+        /// Control for tweaking the bias current for mixer.
+        /// - 0000: 0 bias current.
+        /// - 0111: nominal bias current. (Default)
+        /// - 1111: 2.1x nominal bias current.
+        pub ict_mix_rxfe, set_ict_mix_rxfe: 7, 4;
+
+        /// Control for tweaking the bias current for LNA.
+        /// - 0000: 0 bias current.
+        /// - 0111: nominal bias current. (Default)
+        /// - 1111: 2.1x nominal bias current.
+        pub ict_lna_rxfe, set_ict_lna_rxfe: 3, 0;
+
+    }
+    lmsreg!(RxFe0x7A, 0x7A);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x7B(u8);
+        impl Debug;
+
+        /// Control for tweaking the bias current for TIA (RXVGA1).
+        /// - 0000: 0 bias current.
+        /// - 0111: nominal bias current. (Default)
+        /// - 1111: 2.1x nominal bias current.
+        pub ict_tia_rxfe, set_ict_tia_rxfe: 7, 4;
+
+        /// Control for tweaking the bias current for mixer LO buffer.
+        /// - 0000: 0 bias current.
+        /// - 0111: nominal bias current. (Default)
+        /// - 1111: 2.1x nominal bias current.
+        pub ict_mxlob_rxfe, set_ict_mxlob_rxfe: 3, 0;
+    }
+    lmsreg!(RxFe0x7B, 0x7B);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x7C(u8);
+        impl Debug;
+
+        /// Tweak for the LO bias of the mixer for optimum linearity.
+        /// - 0000: Minimum bias voltage.
+        /// - 0011: (Default)
+        /// - 1111: Maximum bias voltage.
+        pub lobn_mix_rxfe, set_lobn_mix_rxfe: 6, 3;
+
+        /// Termination resistor on external mixer input enable.
+        /// - 1: Active.
+        /// - 0: Inactive. (Default)
+        pub rinen_mix_rxfe, set_rinen_mix_rxfe: 2;
+
+        /// LNA3 fine gain adjustment.
+        /// - 00: +0 dB (Default)
+        /// - 01: +1 dB
+        /// - 10: +2 dB
+        /// - 11: +3 dB
+        pub g_fine_lna3_rxfe, set_g_fine_lna3_rxfe: 1, 0;
+    }
+    lmsreg!(RxFe0x7C, 0x7C);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxFe0x7D(u8);
+        impl Debug;
+
+        /// TIA (RXVGA1) power down.
+        /// - 0: Block active. (Default)
+        /// - 1: Block inactive.
+        pub pd_tia_rxfe, set_pd_tia_rxfe: 3;
+
+        /// Mixer LO buffer power down.
+        /// - 0: Block active. (Default)
+        /// - 1: Block inactive.
+        pub pd_mxlob_rxfe, set_pd_mxlob_rxfe: 2;
+
+        /// Mixer power down.
+        /// - 0: Block active. (Default)
+        /// - 1: Block inactive.
+        pub pd_mix_rxfe, set_pd_mix_rxfe: 1;
+
+        /// LNA power down.
+        /// - 0: Block active. (Default)
+        /// - 1: Block inactive.
+        pub pd_lna_rxfe, set_pd_lna_rxfe: 0;
+    }
+    lmsreg!(RxFe0x7D, 0x7D);
+}
+
 // Represents a reserved register.
 #[derive(Clone, Copy, Debug)]
 struct Reserved(u8);
@@ -933,20 +1189,20 @@ pub fn into_debug(addr: u8, val: u8) -> Result<Box<Debug>, ()> {
         ////////////////////////////////////////////////////////////////////
         // RX FE                                                          //
         ////////////////////////////////////////////////////////////////////
-        // 0x70
-        // 0x71
-        // 0x72
-        // 0x73
+        0x70 => Box::new(RxFe0x70(val)),
+        0x71 => Box::new(RxFe0x71(val)),
+        0x72 => Box::new(RxFe0x72(val)),
+        0x73 => Box::new(RxFe0x73(val)),
         // 0x74
-        // 0x75
-        // 0x76
-        // 0x77
-        // 0x78
-        // 0x79
-        // 0x7A
-        // 0x7B
-        // 0x7C
-        // 0x7D
+        0x75 => Box::new(RxFe0x75(val)),
+        0x76 => Box::new(RxFe0x76(val)),
+        0x77 => Box::new(RxFe0x77(val)),
+        0x78 => Box::new(RxFe0x78(val)),
+        0x79 => Box::new(RxFe0x79(val)),
+        0x7A => Box::new(RxFe0x7A(val)),
+        0x7B => Box::new(RxFe0x7B(val)),
+        0x7C => Box::new(RxFe0x7C(val)),
+        0x7D => Box::new(RxFe0x7D(val)),
         // 0x7E
         // 0x7F
         addr if addr < 128 => Box::new(val),
