@@ -5,36 +5,14 @@ extern crate log;
 extern crate spidev;
 #[macro_use]
 extern crate structopt;
-
 mod cmdline;
+mod error;
 mod interface;
-
 use cmdline::*;
-use std::io;
 use std::process;
 use structopt::StructOpt;
 
-type Result = ::std::result::Result<(), Error>;
-
-#[derive(Debug)]
-enum Error {
-    Io(io::Error),
-    Lms(lms6002::Error),
-}
-
-impl std::convert::From<io::Error> for Error {
-    fn from(e: io::Error) -> Error {
-        Error::Io(e)
-    }
-}
-
-impl std::convert::From<lms6002::Error> for Error {
-    fn from(e: lms6002::Error) -> Error {
-        Error::Lms(e)
-    }
-}
-
-fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) -> Result {
+fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) -> error::Result {
     match *cmd {
         RegCmd::read { addr } => {
             let val = lms.read(addr)?;
@@ -51,7 +29,7 @@ fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) -> Result
     Ok(())
 }
 
-fn try_main(opts: Opts) -> Result {
+fn try_main(opts: Opts) -> error::Result {
     use lms6002::Path;
     let iface = interface::Interface::open(opts.dev)?;
     let lms = lms6002::LMS6002::new(iface, 40_000_000);
