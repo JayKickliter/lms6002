@@ -6,6 +6,8 @@ readme = "README.md"
 
 [dependencies]
 bitfield = "0.13.0"
+failure = "0.1.2"
+failure_derive = "0.1.2"
 log = "0.4.4"
 
 [dev-dependencies]

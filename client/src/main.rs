@@ -1,4 +1,7 @@
 extern crate env_logger;
+extern crate failure;
+#[macro_use]
+extern crate failure_derive;
 extern crate lms6002;
 extern crate log;
 #[cfg(feature = "spi")]
@@ -53,7 +56,7 @@ fn main() {
     match try_main(opts) {
         Ok(_) => process::exit(0),
         Err(e) => {
-            eprintln!("{:?}", e);
+            eprintln!("ERROR: {}", e);
             process::exit(1);
         }
     }
