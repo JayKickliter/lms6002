@@ -23,6 +23,7 @@ use std::marker::PhantomData;
 
 pub use self::pll::*;
 pub use self::rxfe::*;
+pub use self::rxvga2::*;
 pub use self::top::*;
 
 pub trait LmsReg: Debug + From<u8> + Into<u8> + Copy {
@@ -788,6 +789,246 @@ mod pll {
     pllreg!(Pll0x0B, 0x0B);
 }
 
+mod rxvga2 {
+    ////////////////////////////////////////////////////////////////////////
+    // RX VGA2 Register                                                   //
+    ////////////////////////////////////////////////////////////////////////
+    use super::*;
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x60(u8);
+        impl Debug;
+
+        /// Value from DC Calibration module selected by DC_ADDR.
+        pub dc_regval, _: 5, 0;
+    }
+    lmsreg!(RxVga0x60, 0x60);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x61(u8);
+        impl Debug;
+
+        /// Lock pattern register.
+        ///
+        /// Locked when register value is not "000" nor "111".
+        pub dc_lock, _: 4, 2;
+
+        /// Indicates calibration status.
+        /// - 1: Calibration in progress.
+        /// - 0: Calibration is done.
+        pub dc_clbr_done, _: 1;
+
+        /// Value from DC module comparator, selected by DC_ADDR
+        /// - 1: Count Up.
+        /// - 0: Count Down.
+        pub dc_ud, _: 0;
+    }
+    lmsreg!(RxVga0x61, 0x61);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x62(u8);
+        impl Debug;
+
+        /// Value to load into selected (by DC_ADDR) DC calibration module.
+        pub dc_cntval, set_dc_cntval: 5, 0;
+
+    }
+    lmsreg!(RxVga0x62, 0x62);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x63(u8);
+        impl Debug;
+
+        /// Start calibration command of the module, selected by DC_ADDR.
+        // 1 – Start Calibration.
+        // 0 – Deactivate Start Calibration command. (Default)
+        pub dc_start_clbr, set_dc_start_clbr: 5;
+
+        /// Load value from DC_CNTVAL to module, selected by DC_ADDR.
+        // - 1: Load Value.
+        // - 0: Deactivate Load Value command. (Default)
+        pub dc_load, set_dc_load: 4;
+
+        /// Resets all DC Calibration modules.
+        /// - 1: Reset inactive. (Default)
+        /// - 0: Reset active.
+        pub dc_sreset, set_dc_sreset: 3;
+
+        /// Active calibration module address.
+        /// - 000: DC reference module.
+        /// - 001: First gain stage (VGA2A), I channel.
+        /// - 010: First gain stage (VGA2A), Q channel.
+        /// - 011: Second gain stage (VGA2B), I channel.
+        /// - 100: Second gain stage (VGA2B), Q channel.
+        /// - 101-111: Not used.
+        pub dc_addr, set_dc_addr: 2, 0;
+    }
+    lmsreg!(RxVga0x63, 0x63);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x64(u8);
+        impl Debug;
+
+        /// RXVGA2 output common mode voltage control. VCM[3] – sign, VCM[2:0] – magnitude, LSB=40mV.
+        ///
+        /// Code | Voltage [V]
+        /// -----|------------
+        /// 0000 | 1.18
+        /// 0001 | 1.14
+        /// 0010 | 1.10
+        /// 0011 | 1.06
+        /// 0100 | 1.02
+        /// 0101 | 0.98
+        /// 0110 | 0.94
+        /// 0111 | 0.90 (Default)
+        /// 1000 | 0.62
+        /// 1001 | 0.66
+        /// 1010 | 0.70
+        /// 1011 | 0.74
+        /// 1100 | 0.78
+        /// 1101 | 0.82
+        /// 1110 | 0.86
+        pub vcm, set_vcm: 5, 2;
+
+        /// RXVGA2 modules enable.
+        /// - 0: RXVGA2 modules powered down.
+        /// - 1: RXVGA2 modules enabled. (Default)
+        pub en, set_en: 1;
+
+        /// - 0: Decode control signals. (Default)
+        /// - 1: Use control signals from test mode registers.
+        pub decode, set_decode: 0;
+    }
+    lmsreg!(RxVga0x64, 0x64);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x65(u8);
+        impl Debug;
+        /// RXVGA2 gain control.
+        ///
+        /// LSB=3dB, encoded as shown below.
+        ///
+        /// Code  | Gain [dB]
+        /// ------|------------
+        /// 00000 | 0
+        /// 00001 | 3 (Default)
+        /// …     | …
+        /// 01001 | 27
+        /// 01010 | 30
+        /// …     | …
+        /// 10100 | 60
+        ///
+        /// Not recommended to be used above 30dB.
+        pub vga2gain, set_vga2gain: 4, 0;
+    }
+    lmsreg!(RxVga0x65, 0x65);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x66(u8);
+        impl Debug;
+
+        /// DC current regulator.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd9, set_pd_9: 5;
+
+        /// DC calibration DAC for VGA2B.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd8, set_pd8: 4;
+
+        /// DC calibration DAC for VGA2A.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd6, set_pd6: 2;
+
+        /// Band gap.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd4, set_pd4: 0;
+    }
+    lmsreg!(RxVga0x66, 0x66);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x67(u8);
+        impl Debug;
+
+        /// Output buffer in both RXVGAs.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd3, set_pd3: 3;
+
+        /// RXVGA2B.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd2, set_pd2: 2;
+
+        /// RXVGA2A.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd1, set_pd1: 1;
+
+        /// Current reference.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd0, set_pd0: 0;
+    }
+    lmsreg!(RxVga0x67, 0x67);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x68(u8);
+        impl Debug;
+
+        /// Controls the gain of second VGA2 stage (VGA2B). LSB=3dB, encoded as shown below.
+        /// Code | Gain [dB]
+        /// -----|------------
+        /// 0000 | 0 (Default)
+        /// 0001 | 3
+        /// …    | …
+        /// 1001 | 27
+        /// 1010 | 30
+        pub vga2gainb, set_vga2gainb: 7, 4;
+
+        /// Controls the gain of first VGA2 stage (VGA2A). LSB=3dB, encoded as shown below.
+        /// Code | Gain [dB]
+        /// -----|------------
+        /// 0000 | 0
+        /// 0001 | 3 (Default)
+        /// …    | …
+        /// 1001 | 27
+        /// 1010 | 30
+        pub vga2gaina, set_vga2gaina: 3, 0;
+
+    }
+    lmsreg!(RxVga0x68, 0x68);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxVga0x6E(u8);
+        impl Debug;
+
+        /// DC calibration comparator for VGA2B.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd7, set_pd7: 7;
+
+        /// DC calibration comparator for VGA2A.
+        /// - 1: Powered down.
+        /// - 0: Powered up. (Default)
+        pub pd6, set_pd6: 6;
+    }
+    lmsreg!(RxVga0x6E, 0x6E);
+}
+
 mod rxfe {
     ////////////////////////////////////////////////////////////////////////
     // RX Frontend Registers                                              //
@@ -1171,21 +1412,21 @@ pub fn into_debug(addr: u8, val: u8) -> ::error::Result<Box<Debug>> {
         ////////////////////////////////////////////////////////////////////
         // RX VGA2                                                        //
         ////////////////////////////////////////////////////////////////////
-        // 0x60
-        // 0x61
-        // 0x62
-        // 0x63
-        // 0x64
-        // 0x65
-        // 0x66
-        // 0x67
-        // 0x68
+        0x60 => Box::new(RxVga0x60(val)),
+        0x61 => Box::new(RxVga0x61(val)),
+        0x62 => Box::new(RxVga0x62(val)),
+        0x63 => Box::new(RxVga0x63(val)),
+        0x64 => Box::new(RxVga0x64(val)),
+        0x65 => Box::new(RxVga0x65(val)),
+        0x66 => Box::new(RxVga0x66(val)),
+        0x67 => Box::new(RxVga0x67(val)),
+        0x68 => Box::new(RxVga0x68(val)),
         // 0x69
         // 0x6A
         // 0x6B
         // 0x6C
         // 0x6D
-        // 0x6E
+        0x6E => Box::new(RxVga0x6E(val)),
         // 0x6F
         ////////////////////////////////////////////////////////////////////
         // RX FE                                                          //
