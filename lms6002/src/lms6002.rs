@@ -120,8 +120,13 @@ impl<I: Interface> LMS6002<I> {
         Ok(())
     }
 
+    /// Returns `path`'s current frequency.
+    pub fn freq(&self, _path: Path) -> Result<()> {
+        unimplemented!()
+    }
+
     /// Tunes specified `path` to `freq`.
-    pub fn tune(&self, path: Path, freq: f64) -> Result<()> {
+    pub fn set_freq(&self, path: Path, freq: f64) -> Result<()> {
         let params = algo::freq_to_params(self.clk, freq)?;
         info!("Tuning {:?} path to {} using {:?}", path, freq, params);
 
