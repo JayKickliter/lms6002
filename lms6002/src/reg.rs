@@ -845,16 +845,16 @@ mod txlpf {
 
         /// Start calibration command of module selected by DC_ADDR.
         /// - 1: Start calibration.
-        /// - 0: Deactivate start calibration command. (Default)
+        /// - 0: Deactivate start calibration command. **(Default)**
         pub dc_start_clbr, set_dc_start_clbr: 5;
 
         /// Load value from DC_CNTVAL to module, selected by DC_ADDR.
         /// - 1: Load Value.
-        /// - 0: Deactivate Load Value command. (Default)
+        /// - 0: Deactivate Load Value command. **(Default)**
         pub dc_load, set_dc_load: 4;
 
         /// Resets all DC Calibration modules.
-        /// - 1: Reset inactive. (Default)
+        /// - 1: Reset inactive. **(Default)**
         /// - 0: Reset active.
         pub dc_sreset, set_dc_sreset: 3;
 
@@ -875,7 +875,7 @@ mod txlpf {
         ///
         /// code | Bandwidth [MHz]
         /// -----|----------------
-        /// 0000 | 14 (Default)
+        /// 0000 | 14 **(Default)**
         /// 0001 | 10
         /// 0010 | 7
         /// 0011 | 6
@@ -895,11 +895,11 @@ mod txlpf {
 
         /// LPF modules enable.
         /// - 0: LPF modules powered down.
-        /// - 1: LPF modules enabled. (Default)
+        /// - 1: LPF modules enabled. **(Default)**
         pub en, set_en: 1;
 
         /// Decode.
-        /// - 0: Decode control signals. (Default)
+        /// - 0: Decode control signals. **(Default)**
         /// - 1: Use control signals from test mode registers.
         pub decode, set_decode: 0;
     }
@@ -912,11 +912,11 @@ mod txlpf {
 
         /// LPF bypass enable.
         /// - 1: Bypass switches will bypass the LPF.
-        /// - 0: Normal operation. (Default)
+        /// - 0: Normal operation. **(Default)**
         pub byp_en_lpf, set_byp_en_lpf: 6;
 
         /// Resistor calibration control for the DC offset cancellation DAC.
-        /// - 001100: (Default)
+        /// - 001100: **(Default)**
         pub dco_daccal, set_dco_daccal: 5, 0;
     }
     lmsreg!(TxLpf0x35, 0x35);
@@ -927,27 +927,27 @@ mod txlpf {
         impl Debug;
 
         /// TX data DAC buffers power down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         /// - 1: Powered Down.
         pub tx_dacbuf_pd, set_tx_dacbuf_pd: 7;
 
         /// Calibration value, coming from TRX_LPF_CAL module.
-        /// - 011: (Default)
+        /// - 011: **(Default)**
         pub rccal_lpf, set_rccal_lpf: 6, 4;
 
         /// Power down for the DAC in the DC offset cancellation block.
         /// - 1: Powered Down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         pub pd_dcodac_lpf, set_pd_dcodac_lpf: 2;
 
         /// Power down signal for the dc_ref_con3 block.
         /// - 1: Powered Down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         pub pd_dcoref_lpf, set_pd_dcoref_lpf: 1;
 
         /// Power down for the filter.
         /// - 1: Powered Down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         pub pd_fil_lpf, set_pd_fil_lpf: 0;
     }
     lmsreg!(TxLpf0x36, 0x36);
@@ -959,7 +959,7 @@ mod txlpf {
 
         /// Power down DC offset comparators in DC offset cancellation block. Should be powered up only when DC offset cancellation algorithm is running.
         /// - 1: Powered Down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         pub pd_dcocmp_lpf, set_pd_dcocmp_lpf: 7;
     }
     lmsreg!(TxLpf0x3F, 0x3F);
@@ -1020,21 +1020,21 @@ mod adcdac {
 
         /// Start calibration command of the module, selected by DC_ADDR.
         /// - 1: Start Calibration.
-        /// - 0: Deactivate Start Calibration command. (Default)
+        /// - 0: Deactivate Start Calibration command. **(Default)**
         pub dc_start_clbr, set_dc_start_clbr: 5;
 
         /// Load value from DC_CNTVAL to module, selected by DC_ADDR.
         /// - 1: Load Value.
-        /// - 0: Deactivate Load Value command. (Default)
+        /// - 0: Deactivate Load Value command. **(Default)**
         pub dc_load, set_dc_load: 4;
 
         /// Resets all DC Calibration modules.
-        /// - 1: Reset inactive. (Default)
+        /// - 1: Reset inactive. **(Default)**
         /// - 0: Reset active.
         pub dc_sreset, set_dc_sreset: 3;
 
         /// Active calibration module address.
-        /// - 000: I filter. (Default)
+        /// - 000: I filter. **(Default)**
         /// - 001: Q filter.
         /// 010-- 111: Not used.
         pub dc_addr, set_dc_addr: 2, 0;
@@ -1050,7 +1050,7 @@ mod adcdac {
         ///
         /// code | Bandwidth [MHz]
         /// -----|----------------
-        /// 0000 | 14 (Default)
+        /// 0000 | 14 **(Default)**
         /// 0001 | 10
         /// 0010 | 7
         /// 0011 | 6
@@ -1070,11 +1070,11 @@ mod adcdac {
 
         /// LPF modules enable.
         /// - 0: LPF modules powered down.
-        /// - 1: LPF modules enabled. (Default)
+        /// - 1: LPF modules enabled. **(Default)**
         pub en, set_en: 1;
 
         /// Decode.
-        /// - 0: Decode control signals. (Default)
+        /// - 0: Decode control signals. **(Default)**
         /// - 1: Use control signals from test mode registers.
         pub decode, set_decode: 0;
     }
@@ -1087,11 +1087,11 @@ mod adcdac {
 
         /// BYP_EN_LPF: LPF bypass enable.
         /// - 1: Bypass switches will bypass the LPF.
-        /// - 0: Normal operation. (Default)
+        /// - 0: Normal operation. **(Default)**
         pub byp_en_lpf, set_byp_en_lpf: 6;
 
         /// Resistor calibration control for the DC offset cancellation DAC.
-        /// - 001100: (Default)
+        /// - 001100: **(Default)**
         pub dco_daccal, set_dco_daccal: 5, 0;
     }
     lmsreg!(RxLpfDacAdc0x55, 0x55);
@@ -1103,11 +1103,11 @@ mod adcdac {
 
         /// ADC/DAC modules enable.
         /// - 0: ADC/DAC modules powered down.
-        /// - 1: ADC/DAC modules enabled. (Default)
+        /// - 1: ADC/DAC modules enabled. **(Default)**
         pub en_adc_dac, set_en_adc_dac: 7;
 
         /// Decode.
-        /// - 0: Decode ADC/DAC enable signals. (Default)
+        /// - 0: Decode ADC/DAC enable signals. **(Default)**
         /// - 1: Use ADC/DAC enable signals from MISC_CTRL[4:0] register.
         pub decode, set_decode: 6;
 
@@ -1117,13 +1117,13 @@ mod adcdac {
         /// - 101: 66 Ohms.
         /// - 100: 200 Ohms.
         /// - 011: 66 Ohms.
-        /// - 010: 200 Ohms. (Default)
+        /// - 010: 200 Ohms. **(Default)**
         /// - 001: 100 Ohms.
         /// - 000: Open Circuit.
         pub tx_ctrl1_out_load_res_ctl, set_tx_ctrl1_out_load_res_ctl: 5, 3;
 
         /// DAC Reference Current Resistor.
-        /// - 1: External. (Default)
+        /// - 1: External. **(Default)**
         /// - 0: Internal.
         pub tx_ctrl1_refres, set_tx_ctrl1_refres: 2;
 
@@ -1131,7 +1131,7 @@ mod adcdac {
         /// - 11: Iout FS=5ma.
         /// - 10: Iout FS=2.5ma.
         /// - 01: Iout FS=10ma.
-        /// - 00: Iout FS=5ma. (Default)
+        /// - 00: Iout FS=5ma. **(Default)**
         pub tx_ctrl1_fso, set_tx_ctrl1_fso: 1, 0;
     }
     lmsreg!(RxLpfDacAdc0x57, 0x57);
@@ -1142,22 +1142,22 @@ mod adcdac {
         impl Debug;
 
         /// Calibration value, coming from TRX_LPF_CAL module.
-        /// - 011: (Default)
+        /// - 011: **(Default)**
         pub rccal_lpf, set_rccal_lpf: 6, 4;
 
         /// Power down for the DAC in the DC offset cancellation block.
         /// - 1: Powered Down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         pub pd_dcodac_lpf, set_pd_dcodac_lpf: 2;
 
         /// Power down signal for the dc_ref_con3 block.
         /// - 1: Powered Down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         pub pd_dcoref_lpf, set_pd_dcoref_lpf: 1;
 
         /// Power down for the filter.
         /// - 1: Powered Down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         pub pd_fil_lpf, set_pd_fil_lpf: 0;
     }
     lmsreg!(RxLpfDacAdc0x56, 0x56);
@@ -1171,20 +1171,20 @@ mod adcdac {
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub rx_ctrl1_ref_bias_res_adj, set_rx_ctrl1_ref_bias_res_adj: 7, 6;
 
         /// Reference bias UP.
         /// - 11: 2.5X.
         /// - 10: 2.0X.
         /// - 01: 1.5X.
-        /// - 00: 1.0X. (Default)
+        /// - 00: 1.0X. **(Default)**
         pub rx_ctrl1_ref_bias_up, set_rx_ctrl1_ref_bias_up: 5, 4;
 
         /// Reference bias DOWN.
         /// - 1111: Min bias.
         /// - …
-        /// - 0000: Max bias. (Default)
+        /// - 0000: Max bias. **(Default)**
         pub rx_ctrl1_ref_bias_down, set_rx_ctrl1_ref_bias_down: 3, 0;
     }
     lmsreg!(RxLpfDacAdc0x58, 0x58);
@@ -1198,25 +1198,25 @@ mod adcdac {
         /// - 11: 1.25V.
         /// - 10: 1.00V.
         /// - 01: 1.75V.
-        /// - 00: 1.50V. (Default)
+        /// - 00: 1.50V. **(Default)**
         pub rx_ctrl2_ref_gain_adj, set_rx_ctrl2_ref_gain_adj: 6, 5;
 
         /// Common Mode Adjust.
         /// - 11: 790mV
         /// - 10: 700mV
         /// - 01: 960mV
-        /// - 00: 875mV (Default)
+        /// - 00: 875mV **(Default)**
         pub rx_ctrl2_common_mode_adj, set_rx_ctrl2_common_mode_adj: 4, 3;
 
         /// Reference Buffer Boost.
         /// - 11: 2.5X.
         /// - 10: 2.0X.
         /// - 01: 1.5X.
-        /// - 00: 1.0X. (Default)
+        /// - 00: 1.0X. **(Default)**
         pub rx_ctrl2_reg_buf_boost, set_rx_ctrl2_reg_buf_boost: 2, 1;
 
         /// ADC Input Buffer Disable.
-        /// - 1: Disabled. (Default)
+        /// - 1: Disabled. **(Default)**
         /// - 0: Enabled.
         pub rx_ctrl2_adc_input_buf_dis, set_rx_ctrl2_adc_input_buf_dis: 0;
     }
@@ -1229,39 +1229,39 @@ mod adcdac {
 
         /// Rx Fsync Polarity, frame start.
         /// - 1: 1.
-        /// - 0: 0. (Default)
+        /// - 0: 0. **(Default)**
         pub misc_ctrl_rx_fsync_pol, set_misc_ctrl_rx_fsync_pol: 7;
 
         /// Rx Interleave Mode.
         /// - 1: Q,I.
-        /// - 0: I,Q. (Default)
+        /// - 0: I,Q. **(Default)**
         pub misc_ctrl_rx_interleave_mode, set_misc_ctrl_rx_interleave_mode: 6;
 
         /// DAC Clk Edge Polarity.
-        /// - 1: Negative. (Default)
+        /// - 1: Negative. **(Default)**
         /// - 0: Positive.
         pub misc_ctrl_dac_clk_edge_pol, set_misc_ctrl_dac_clk_edge_pol: 5;
 
         /// Tx Fsync Polarity, frame start.
         /// - 1: 1.
-        /// - 0: 0. (Default)
+        /// - 0: 0. **(Default)**
         pub misc_ctrl_tx_fsync_pol, set_misc_ctrl_tx_fsync_pol: 4;
 
         /// Tx Interleave Mode.
         /// - 1: Q,I.
-        /// - 0: I,Q. (Default)
+        /// - 0: I,Q. **(Default)**
         pub misc_ctrl_tx_interleave_mode, set_misc_ctrl_tx_interleave_mode: 3;
 
         /// ADC Sampling Phase Select.
         /// - 1: Falling edge.
-        /// - 0: Rising edge. (Default)
+        /// - 0: Rising edge. **(Default)**
         pub rx_ctrl3_adc_sampling_phase, set_rx_ctrl3_adc_sampling_phase: 2;
 
         /// Clock Non-Overlap Adjust.
         /// - 11: +300ps.
         /// - 10: +150ps.
         /// - 01: +450ps.
-        /// - 00: Nominal. (Default)
+        /// - 00: Nominal. **(Default)**
         pub rx_ctrl3_clk_non_overlap_adj, set_rx_ctrl3_clk_non_overlap_adj: 1, 0;
     }
     lmsreg!(RxLpfDacAdc0x5A, 0x5A);
@@ -1275,28 +1275,28 @@ mod adcdac {
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub rx_ctrl4_adc_bias_res_adj, set_rx_ctrl4_adc_bias_res_adj: 7, 6;
 
         /// Main bias DOWN.
         /// - 11: Min bias.
         /// - 10:
         /// - 01:
-        /// - 00: Nominal. (Default)
+        /// - 00: Nominal. **(Default)**
         pub rx_ctrl4_main_bias_down, set_rx_ctrl4_main_bias_down: 5, 4;
 
         /// ADC Amp1 stage1 bias UP.
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub rx_ctrl4_amp1_stage1_bias_up, set_rx_ctrl4_amp1_stage1_bias_up: 3, 2;
 
         /// ADC Amp2-4 stage1 bias UP.
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub rx_ctrl4_adc_amp2_4_stage1_bias_up, set_rx_ctrl4_adc_amp2_4_stage1_bias_up: 1, 0;
     }
     lmsreg!(RxLpfDacAdc0x5B, 0x5B);
@@ -1310,28 +1310,28 @@ mod adcdac {
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub rx_ctrl5_adc_amp1_stage2_bias_up, set_rx_ctrl5_adc_amp1_stage2_bias_up: 7, 6;
 
         /// ADC Amp2-4 stage2 bias UP.
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub rx_ctrl5_adc_amp2_4_stage2_bias_up, set_rx_ctrl5_adc_amp2_4_stage2_bias_up: 5, 4;
 
         /// Quantizer bias UP.
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub rx_ctrl5_quat_bias_up, set_rx_ctrl5_quat_bias_up: 3, 2;
 
         /// Input Buffer bias UP.
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub rx_ctrl5_inbuf_bias_up, set_rx_ctrl5_inbuf_bias_up: 1, 0;
     }
     lmsreg!(RxLpfDacAdc0x5C, 0x5C);
@@ -1343,13 +1343,13 @@ mod adcdac {
 
         /// Bandgap Temperature Coefficient Control.
         /// - 0111: Max.
-        /// - 0000: Nominal. (Default)
+        /// - 0000: Nominal. **(Default)**
         /// - 1000: Min.
         pub ref_ctrl0_bandgap_temp_coef, set_ref_ctrl0_bandgap_temp_coef: 7, 4;
 
         /// Bandgap Gain Control.
         /// - 0111: Max.
-        /// - 0000: Nominal. (Default)
+        /// - 0000: Nominal. **(Default)**
         /// - 1000: Min.
         pub ref_ctrl0_bandgap_gain, set_ref_ctrl0_bandgap_gain: 3, 0;
     }
@@ -1364,20 +1364,20 @@ mod adcdac {
         /// - 11: 15uA.
         /// - 10: 10uA.
         /// - 01: 40uA.
-        /// - 00: 20uA. (Default)
+        /// - 00: 20uA. **(Default)**
         pub ref_ctrl1_reg_amps_bias_adj, set_ref_ctrl1_reg_amps_bias_adj: 7, 6;
 
         /// Reference Amps bias UP.
         /// - 11: 2.5X.
         /// - 10: 2.0X.
         /// - 01: 1.5X.
-        /// - 00: 1.0X. (Default)
+        /// - 00: 1.0X. **(Default)**
         pub ref_ctrl1_reg_amps_bias_up, set_ref_ctrl1_reg_amps_bias_up: 5, 4;
 
         /// Reference Amps bias DOWN.
         /// - 1111: Min bias.
         /// - …
-        /// - 0000: Max bias. (Default)
+        /// - 0000: Max bias. **(Default)**
         pub ref_ctrl1_reg_amps_bias_down, set_ref_ctrl1_reg_amps_bias_down: 3, 0;
     }
     lmsreg!(RxLpfDacAdc0x5E, 0x5E);
@@ -1389,31 +1389,31 @@ mod adcdac {
 
         /// Power down DC offset comparators in DC offset cancellation block. Should be powered up only when DC offset cancellation algorithm is running.
         /// - 1: Powered Down.
-        /// - 0: Enabled. (Default)
+        /// - 0: Enabled. **(Default)**
         pub pd_dcocmp_lpf, set_pd_dcocmp_lpf: 7;
 
         /// Enable DAC.
-        /// - 1: Enable. (Default)
+        /// - 1: Enable. **(Default)**
         /// - 0: Off.
         pub misc_ctrl_dac_en, set_misc_ctrl_dac_en: 4;
 
         /// Enable ADC1 (I Channel).
-        /// - 1: Enable. (Default)
+        /// - 1: Enable. **(Default)**
         /// - 0: Off.
         pub misc_ctrl_adc1_en, set_misc_ctrl_adc1_en: 3;
 
         /// Enable ADC2 (Q Channel).
-        /// - 1: Enable. (Default)
+        /// - 1: Enable. **(Default)**
         /// - 0: Off.
         pub misc_ctrl_adc2_en, set_misc_ctrl_adc2_en: 2;
 
         /// Enable ADC reference.
-        /// - 1: Enable. (Default)
+        /// - 1: Enable. **(Default)**
         /// - 0: Off.
         pub misc_ctrl_adc_ref_en, set_misc_ctrl_adc_ref_en: 1;
 
         /// Enable master reference.
-        /// - 1: Enable. (Default)
+        /// - 1: Enable. **(Default)**
         /// - 0: Off.
         pub misc_ctrl_master_ref_en, set_misc_ctrl_master_ref_en: 0;
     }
@@ -1477,16 +1477,16 @@ mod rxvga2 {
 
         /// Start calibration command of the module, selected by DC_ADDR.
         // - 1: Start Calibration.
-        // - 0: Deactivate Start Calibration command. (Default)
+        // - 0: Deactivate Start Calibration command. **(Default)**
         pub dc_start_clbr, set_dc_start_clbr: 5;
 
         /// Load value from DC_CNTVAL to module, selected by DC_ADDR.
         // - 1: Load Value.
-        // - 0: Deactivate Load Value command. (Default)
+        // - 0: Deactivate Load Value command. **(Default)**
         pub dc_load, set_dc_load: 4;
 
         /// Resets all DC Calibration modules.
-        /// - 1: Reset inactive. (Default)
+        /// - 1: Reset inactive. **(Default)**
         /// - 0: Reset active.
         pub dc_sreset, set_dc_sreset: 3;
 
@@ -1517,7 +1517,7 @@ mod rxvga2 {
         /// 0100 | 1.02
         /// 0101 | 0.98
         /// 0110 | 0.94
-        /// 0111 | 0.90 (Default)
+        /// 0111 | 0.90 **(Default)**
         /// 1000 | 0.62
         /// 1001 | 0.66
         /// 1010 | 0.70
@@ -1529,10 +1529,10 @@ mod rxvga2 {
 
         /// RXVGA2 modules enable.
         /// - 0: RXVGA2 modules powered down.
-        /// - 1: RXVGA2 modules enabled. (Default)
+        /// - 1: RXVGA2 modules enabled. **(Default)**
         pub en, set_en: 1;
 
-        /// - 0: Decode control signals. (Default)
+        /// - 0: Decode control signals. **(Default)**
         /// - 1: Use control signals from test mode registers.
         pub decode, set_decode: 0;
     }
@@ -1549,7 +1549,7 @@ mod rxvga2 {
         /// Code  | Gain [dB]
         /// ------|------------
         /// 00000 | 0
-        /// 00001 | 3 (Default)
+        /// 00001 | 3 **(Default)**
         /// …     | …
         /// 01001 | 27
         /// 01010 | 30
@@ -1568,22 +1568,22 @@ mod rxvga2 {
 
         /// DC current regulator.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd9, set_pd_9: 5;
 
         /// DC calibration DAC for VGA2B.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd8, set_pd8: 4;
 
         /// DC calibration DAC for VGA2A.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd6, set_pd6: 2;
 
         /// Band gap.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd4, set_pd4: 0;
     }
     lmsreg!(RxVga0x66, 0x66);
@@ -1595,22 +1595,22 @@ mod rxvga2 {
 
         /// Output buffer in both RXVGAs.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd3, set_pd3: 3;
 
         /// RXVGA2B.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd2, set_pd2: 2;
 
         /// RXVGA2A.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd1, set_pd1: 1;
 
         /// Current reference.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd0, set_pd0: 0;
     }
     lmsreg!(RxVga0x67, 0x67);
@@ -1623,7 +1623,7 @@ mod rxvga2 {
         /// Controls the gain of second VGA2 stage (VGA2B). LSB=3dB, encoded as shown below.
         /// Code | Gain [dB]
         /// -----|------------
-        /// 0000 | 0 (Default)
+        /// 0000 | 0 **(Default)**
         /// 0001 | 3
         /// …    | …
         /// 1001 | 27
@@ -1634,7 +1634,7 @@ mod rxvga2 {
         /// Code | Gain [dB]
         /// -----|------------
         /// 0000 | 0
-        /// 0001 | 3 (Default)
+        /// 0001 | 3 **(Default)**
         /// …    | …
         /// 1001 | 27
         /// 1010 | 30
@@ -1650,12 +1650,12 @@ mod rxvga2 {
 
         /// DC calibration comparator for VGA2B.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd7, set_pd7: 7;
 
         /// DC calibration comparator for VGA2A.
         /// - 1: Powered down.
-        /// - 0: Powered up. (Default)
+        /// - 0: Powered up. **(Default)**
         pub pd6, set_pd6: 6;
     }
     lmsreg!(RxVga0x6E, 0x6E);
@@ -1673,13 +1673,13 @@ mod rxfe {
         impl Debug;
 
         /// DECODE
-        /// - 0: Decode control signals. (Default)
+        /// - 0: Decode control signals. **(Default)**
         /// - 1: Use control signals from test mode registers.
         pub decode, set_decode: 1;
 
         /// EN: RXFE modules enable.
         /// - 0: Top modules powered down
-        /// - 1: Top modules enabled (Default)
+        /// - 1: Top modules enabled **(Default)**
         pub en, set_en: 0;
     }
     lmsreg!(RxFe0x70, 0x70);
@@ -1690,13 +1690,13 @@ mod rxfe {
         impl Debug;
 
         /// Selects the input to the mixer.
-        /// - 1: Input 1 is selected, shorted on-chip to LNA internal output. (Default)
+        /// - 1: Input 1 is selected, shorted on-chip to LNA internal output. **(Default)**
         /// - 0: Input 2 is selected, connected to pads.
         pub in1sel_mix_rxfe, set_in1sel_mix_rxfe: 7;
 
         /// DC offset cancellation, I channel.
         /// - Code is Sign(<6>)-Magnitude(<5:0>), signed magnitude format.
-        /// - 0000000: (Default)
+        /// - 0000000: **(Default)**
         pub dcoff_i_rxfe, set_dcoff_i_rxfe: 6, 0;
     }
     lmsreg!(RxFe0x71, 0x71);
@@ -1707,13 +1707,13 @@ mod rxfe {
         impl Debug;
 
         /// To select the internal load for the LNA.
-        /// - 1: Internal load is active. (Default)
+        /// - 1: Internal load is active. **(Default)**
         /// - 0: Internal load is disabled.
         pub inload_lna_rxfe, set_inload_lna_rxfe: 7;
 
         /// DC offset cancellation, Q channel.
         /// - Code is Sign(<6>)-Magnitude(<5:0>), signed magnitude format.
-        /// - 0000000: (Default)
+        /// - 0000000: **(Default)**
         pub dcoff_q_rxfe, set_dcoff_q_rxfe: 6, 0;
 
     }
@@ -1726,12 +1726,12 @@ mod rxfe {
 
         /// To select the external load for the LNA.
         /// - 1: External load is active.
-        /// - 0: External load is disabled. (Default)
+        /// - 0: External load is disabled. **(Default)**
         pub xload_lna_rxfe, set_xload_lna_rxfe: 7;
 
         /// IP2 cancellation, I channel.
         /// - Code is Sign(<6>)-Magnitude(<5:0>), signed magnitude format.
-        /// - 0000000: (Default)
+        /// - 0000000: **(Default)**
         pub ip2trim_i_rxfe, set_ip2trim_i_rxfe: 6, 0;
     }
     lmsreg!(RxFe0x73, 0x73);
@@ -1742,7 +1742,7 @@ mod rxfe {
         impl Debug;
 
         /// LNA gain mode control.
-        /// - 11: Max gain (all LNAs). (Default)
+        /// - 11: Max gain (all LNAs). **(Default)**
         /// - 10: Mid gain (all LNAs).
         /// - 01: LNA bypassed (LNA1 and LNA2).
         /// - 00: Max gain (LNA3).
@@ -1750,7 +1750,7 @@ mod rxfe {
 
         /// Selects the active LNA.
         /// - 00: All LNAs disabled.
-        /// - 01: LNA1 active. (Default)
+        /// - 01: LNA1 active. **(Default)**
         /// - 10: LNA2 active.
         /// - 11: LNA3 active.
         pub lnasel_rxfe, set_lnasel_rxfe: 5, 4;
@@ -1760,7 +1760,7 @@ mod rxfe {
         /// To be used at lower frequencies for easier matching.
         ///
         /// **NOTE**: For LNA1 and LNA2 only.
-        /// - 0000: (Default)
+        /// - 0000: **(Default)**
         pub cbe_lna_rxfe, set_cbe_lna_rxfe: 3, 0;
 
     }
@@ -1772,7 +1772,7 @@ mod rxfe {
         impl Debug;
 
         /// Feedback resistor control of the TIA (RXVGA1) to set the mixer gain.
-        /// - If = 120 --> mixer gain = 30dB (Default)
+        /// - If = 120 --> mixer gain = 30dB **(Default)**
         /// - If = 102 --> mixer gain = 19dB
         /// - If = 2 --> mixer gain = 5dB
         pub rfb_tia_rxfe, set_rfb_tia_rxfe: 6, 0;
@@ -1785,7 +1785,7 @@ mod rxfe {
         impl Debug;
 
         /// Feedback capacitor for the TIA (RXVGA1) to limit the BW.
-        /// - If = 0, min cap --> BW~45MHz for gain of 30dB. (Default)
+        /// - If = 0, min cap --> BW~45MHz for gain of 30dB. **(Default)**
         /// - If = 19 --> BW=2.5MHz for MixGain=30dB and at TT.
         ///
         /// This cap is supposed to be set according to the RC time
@@ -1806,7 +1806,7 @@ mod rxfe {
         /// In practice, this will be set to high value, the output
         /// will be ac coupled, and the actual load is defined on PCB.
         ///
-        /// - 011100: (Default)
+        /// - 011100: **(Default)**
         pub rdlext_lna_rxfe, set_rdlext_lna_rxfe: 5, 0;
 
     }
@@ -1819,7 +1819,7 @@ mod rxfe {
 
         /// Controls the on-chip LNA load resistor for the internal
         /// load mode of the LNA, LNA1 and LNA2.
-        /// - 011100: (Default)
+        /// - 011100: **(Default)**
         pub rdlint_lna_rxfe, set_rdlint_lna_rxfe: 5, 0;
     }
     lmsreg!(RxFe0x79, 0x79);
@@ -1831,13 +1831,13 @@ mod rxfe {
 
         /// Control for tweaking the bias current for mixer.
         /// - 0000: 0 bias current.
-        /// - 0111: nominal bias current. (Default)
+        /// - 0111: nominal bias current. **(Default)**
         /// - 1111: 2.1x nominal bias current.
         pub ict_mix_rxfe, set_ict_mix_rxfe: 7, 4;
 
         /// Control for tweaking the bias current for LNA.
         /// - 0000: 0 bias current.
-        /// - 0111: nominal bias current. (Default)
+        /// - 0111: nominal bias current. **(Default)**
         /// - 1111: 2.1x nominal bias current.
         pub ict_lna_rxfe, set_ict_lna_rxfe: 3, 0;
 
@@ -1851,13 +1851,13 @@ mod rxfe {
 
         /// Control for tweaking the bias current for TIA (RXVGA1).
         /// - 0000: 0 bias current.
-        /// - 0111: nominal bias current. (Default)
+        /// - 0111: nominal bias current. **(Default)**
         /// - 1111: 2.1x nominal bias current.
         pub ict_tia_rxfe, set_ict_tia_rxfe: 7, 4;
 
         /// Control for tweaking the bias current for mixer LO buffer.
         /// - 0000: 0 bias current.
-        /// - 0111: nominal bias current. (Default)
+        /// - 0111: nominal bias current. **(Default)**
         /// - 1111: 2.1x nominal bias current.
         pub ict_mxlob_rxfe, set_ict_mxlob_rxfe: 3, 0;
     }
@@ -1870,17 +1870,17 @@ mod rxfe {
 
         /// Tweak for the LO bias of the mixer for optimum linearity.
         /// - 0000: Minimum bias voltage.
-        /// - 0011: (Default)
+        /// - 0011: **(Default)**
         /// - 1111: Maximum bias voltage.
         pub lobn_mix_rxfe, set_lobn_mix_rxfe: 6, 3;
 
         /// Termination resistor on external mixer input enable.
         /// - 1: Active.
-        /// - 0: Inactive. (Default)
+        /// - 0: Inactive. **(Default)**
         pub rinen_mix_rxfe, set_rinen_mix_rxfe: 2;
 
         /// LNA3 fine gain adjustment.
-        /// - 00: +0 dB (Default)
+        /// - 00: +0 dB **(Default)**
         /// - 01: +1 dB
         /// - 10: +2 dB
         /// - 11: +3 dB
@@ -1894,22 +1894,22 @@ mod rxfe {
         impl Debug;
 
         /// TIA (RXVGA1) power down.
-        /// - 0: Block active. (Default)
+        /// - 0: Block active. **(Default)**
         /// - 1: Block inactive.
         pub pd_tia_rxfe, set_pd_tia_rxfe: 3;
 
         /// Mixer LO buffer power down.
-        /// - 0: Block active. (Default)
+        /// - 0: Block active. **(Default)**
         /// - 1: Block inactive.
         pub pd_mxlob_rxfe, set_pd_mxlob_rxfe: 2;
 
         /// Mixer power down.
-        /// - 0: Block active. (Default)
+        /// - 0: Block active. **(Default)**
         /// - 1: Block inactive.
         pub pd_mix_rxfe, set_pd_mix_rxfe: 1;
 
         /// LNA power down.
-        /// - 0: Block active. (Default)
+        /// - 0: Block active. **(Default)**
         /// - 1: Block inactive.
         pub pd_lna_rxfe, set_pd_lna_rxfe: 0;
     }
