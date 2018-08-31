@@ -21,6 +21,7 @@ use std::convert::{From, Into};
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
+pub use self::adcdac::*;
 pub use self::pll::*;
 pub use self::rxfe::*;
 pub use self::rxvga2::*;
@@ -789,6 +790,462 @@ mod pll {
     pllreg!(Pll0x0B, 0x0B);
 }
 
+mod adcdac {
+    ////////////////////////////////////////////////////////////////////////
+    // RX LPF, DAC, ADC Registers                                         //
+    ////////////////////////////////////////////////////////////////////////
+    pub use super::*;
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x50(u8);
+        impl Debug;
+
+        /// Value from DC Calibration module, selected by DC_ADDR.
+        pub dc_regval, _: 5, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x50, 0x50);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x51(u8);
+        impl Debug;
+
+        /// Lock pattern register.
+        ///
+        /// Locked, when register value is neither "000" nor "111".
+        pub dc_lock, _: 4, 2;
+
+        /// Indicates calibration status.
+        /// - 1: Calibration in progress.
+        /// - 0: Calibration is done.
+        pub dc_clbr_done, _: 1;
+
+        /// Value from DC module comparator, selected by DC_ADDR.
+        /// - 1: Count Up.
+        /// - 0: Count Down.
+        pub dc_ud, _: 0;
+    }
+    lmsreg!(RxLpfDacAdc0x51, 0x51);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x52(u8);
+        impl Debug;
+
+        /// Value to load into selected (by DC_ADDR) DC calibration module.
+        pub dc_cntval, set_dc_cntval: 5, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x52, 0x52);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x53(u8);
+        impl Debug;
+
+        /// Start calibration command of the module, selected by DC_ADDR.
+        /// - 1: Start Calibration.
+        /// - 0: Deactivate Start Calibration command. (Default)
+        pub dc_start_clbr, set_dc_start_clbr: 5;
+
+        /// Load value from DC_CNTVAL to module, selected by DC_ADDR.
+        /// - 1: Load Value.
+        /// - 0: Deactivate Load Value command. (Default)
+        pub dc_load, set_dc_load: 4;
+
+        /// Resets all DC Calibration modules.
+        /// - 1: Reset inactive. (Default)
+        /// - 0: Reset active.
+        pub dc_sreset, set_dc_sreset: 3;
+
+        /// Active calibration module address.
+        /// - 000: I filter. (Default)
+        /// - 001: Q filter.
+        /// 010-- 111: Not used.
+        pub dc_addr, set_dc_addr: 2, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x53, 0x53);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x54(u8);
+        impl Debug;
+
+        /// LPF bandwidth control.
+        ///
+        /// code | Bandwidth [MHz]
+        /// -----|----------------
+        /// 0000 | 14 (Default)
+        /// 0001 | 10
+        /// 0010 | 7
+        /// 0011 | 6
+        /// 0100 | 5
+        /// 0101 | 4.375
+        /// 0110 | 3.5
+        /// 0111 | 3
+        /// 1000 | 2.75
+        /// 1001 | 2.5
+        /// 1010 | 1.92
+        /// 1011 | 1.5
+        /// 1100 | 1.375
+        /// 1101 | 1.25
+        /// 1110 | 0.875
+        /// 1111 | 0.75
+        pub bwc_lpf, set_bwc_lpf: 5, 2;
+
+        /// LPF modules enable.
+        /// - 0: LPF modules powered down.
+        /// - 1: LPF modules enabled. (Default)
+        pub en, set_en: 1;
+
+        /// Decode.
+        /// - 0: Decode control signals. (Default)
+        /// - 1: Use control signals from test mode registers.
+        pub decode, set_decode: 0;
+    }
+    lmsreg!(RxLpfDacAdc0x54, 0x54);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x55(u8);
+        impl Debug;
+
+        /// BYP_EN_LPF: LPF bypass enable.
+        /// - 1: Bypass switches will bypass the LPF.
+        /// - 0: Normal operation. (Default)
+        pub byp_en_lpf, set_byp_en_lpf: 6;
+
+        /// Resistor calibration control for the DC offset cancellation DAC.
+        /// - 001100: (Default)
+        pub dco_daccal, set_dco_daccal: 5, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x55, 0x55);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x57(u8);
+        impl Debug;
+
+        /// ADC/DAC modules enable.
+        /// - 0: ADC/DAC modules powered down.
+        /// - 1: ADC/DAC modules enabled. (Default)
+        pub en_adc_dac, set_en_adc_dac: 7;
+
+        /// Decode.
+        /// - 0: Decode ADC/DAC enable signals. (Default)
+        /// - 1: Use ADC/DAC enable signals from MISC_CTRL[4:0] register.
+        pub decode, set_decode: 6;
+
+        /// DAC Internal Output Load Resistor Control Bits.
+        /// - 111: 50 Ohms.
+        /// - 110: 100 Ohms.
+        /// - 101: 66 Ohms.
+        /// - 100: 200 Ohms.
+        /// - 011: 66 Ohms.
+        /// - 010: 200 Ohms. (Default)
+        /// - 001: 100 Ohms.
+        /// - 000: Open Circuit.
+        pub tx_ctrl1_out_load_res_ctl, set_tx_ctrl1_out_load_res_ctl: 5, 3;
+
+        /// DAC Reference Current Resistor.
+        /// - 1: External. (Default)
+        /// - 0: Internal.
+        pub tx_ctrl1_refres, set_tx_ctrl1_refres: 2;
+
+        /// DAC Full Scale Output Current Control (single-ended).
+        /// - 11: Iout FS=5ma.
+        /// - 10: Iout FS=2.5ma.
+        /// - 01: Iout FS=10ma.
+        /// - 00: Iout FS=5ma. (Default)
+        pub tx_ctrl1_fso, set_tx_ctrl1_fso: 1, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x57, 0x57);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x56(u8);
+        impl Debug;
+
+        /// Calibration value, coming from TRX_LPF_CAL module.
+        /// - 011: (Default)
+        pub rccal_lpf, set_rccal_lpf: 6, 4;
+
+        /// Power down for the DAC in the DC offset cancellation block.
+        /// - 1: Powered Down.
+        /// - 0: Enabled. (Default)
+        pub pd_dcodac_lpf, set_pd_dcodac_lpf: 2;
+
+        /// Power down signal for the dc_ref_con3 block.
+        /// - 1: Powered Down.
+        /// - 0: Enabled. (Default)
+        pub pd_dcoref_lpf, set_pd_dcoref_lpf: 1;
+
+        /// Power down for the filter.
+        /// - 1: Powered Down.
+        /// - 0: Enabled. (Default)
+        pub pd_fil_lpf, set_pd_fil_lpf: 0;
+    }
+    lmsreg!(RxLpfDacAdc0x56, 0x56);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x58(u8);
+        impl Debug;
+
+        /// Reference bias resistor adjust.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub rx_ctrl1_ref_bias_res_adj, set_rx_ctrl1_ref_bias_res_adj: 7, 6;
+
+        /// Reference bias UP.
+        /// - 11: 2.5X.
+        /// - 10: 2.0X.
+        /// - 01: 1.5X.
+        /// - 00: 1.0X. (Default)
+        pub rx_ctrl1_ref_bias_up, set_rx_ctrl1_ref_bias_up: 5, 4;
+
+        /// Reference bias DOWN.
+        /// - 1111: Min bias.
+        /// - …
+        /// - 0000: Max bias. (Default)
+        pub rx_ctrl1_ref_bias_down, set_rx_ctrl1_ref_bias_down: 3, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x58, 0x58);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x59(u8);
+        impl Debug;
+
+        /// Reference Gain Adjust.
+        /// - 11: 1.25V.
+        /// - 10: 1.00V.
+        /// - 01: 1.75V.
+        /// - 00: 1.50V. (Default)
+        pub rx_ctrl2_ref_gain_adj, set_rx_ctrl2_ref_gain_adj: 6, 5;
+
+        /// Common Mode Adjust.
+        /// - 11: 790mV
+        /// - 10: 700mV
+        /// - 01: 960mV
+        /// - 00: 875mV (Default)
+        pub rx_ctrl2_common_mode_adj, set_rx_ctrl2_common_mode_adj: 4, 3;
+
+        /// Reference Buffer Boost.
+        /// - 11: 2.5X.
+        /// - 10: 2.0X.
+        /// - 01: 1.5X.
+        /// - 00: 1.0X. (Default)
+        pub rx_ctrl2_reg_buf_boost, set_rx_ctrl2_reg_buf_boost: 2, 1;
+
+        /// ADC Input Buffer Disable.
+        /// - 1: Disabled. (Default)
+        /// - 0: Enabled.
+        pub rx_ctrl2_adc_input_buf_dis, set_rx_ctrl2_adc_input_buf_dis: 0;
+    }
+    lmsreg!(RxLpfDacAdc0x59, 0x59);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x5A(u8);
+        impl Debug;
+
+        /// Rx Fsync Polarity, frame start.
+        /// - 1: 1.
+        /// - 0: 0. (Default)
+        pub misc_ctrl_rx_fsync_pol, set_misc_ctrl_rx_fsync_pol: 7;
+
+        /// Rx Interleave Mode.
+        /// - 1: Q,I.
+        /// - 0: I,Q. (Default)
+        pub misc_ctrl_rx_interleave_mode, set_misc_ctrl_rx_interleave_mode: 6;
+
+        /// DAC Clk Edge Polarity.
+        /// - 1: Negative. (Default)
+        /// - 0: Positive.
+        pub misc_ctrl_dac_clk_edge_pol, set_misc_ctrl_dac_clk_edge_pol: 5;
+
+        /// Tx Fsync Polarity, frame start.
+        /// - 1: 1.
+        /// - 0: 0. (Default)
+        pub misc_ctrl_tx_fsync_pol, set_misc_ctrl_tx_fsync_pol: 4;
+
+        /// Tx Interleave Mode.
+        /// - 1: Q,I.
+        /// - 0: I,Q. (Default)
+        pub misc_ctrl_tx_interleave_mode, set_misc_ctrl_tx_interleave_mode: 3;
+
+        /// ADC Sampling Phase Select.
+        /// - 1: Falling edge.
+        /// - 0: Rising edge. (Default)
+        pub rx_ctrl3_adc_sampling_phase, set_rx_ctrl3_adc_sampling_phase: 2;
+
+        /// Clock Non-Overlap Adjust.
+        /// - 11: +300ps.
+        /// - 10: +150ps.
+        /// - 01: +450ps.
+        /// - 00: Nominal. (Default)
+        pub rx_ctrl3_clk_non_overlap_adj, set_rx_ctrl3_clk_non_overlap_adj: 1, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x5A, 0x5A);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x5B(u8);
+        impl Debug;
+
+        /// ADC bias resistor adjust.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub rx_ctrl4_adc_bias_res_adj, set_rx_ctrl4_adc_bias_res_adj: 7, 6;
+
+        /// Main bias DOWN.
+        /// - 11: Min bias.
+        /// - 10:
+        /// - 01:
+        /// - 00: Nominal. (Default)
+        pub rx_ctrl4_main_bias_down, set_rx_ctrl4_main_bias_down: 5, 4;
+
+        /// ADC Amp1 stage1 bias UP.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub rx_ctrl4_amp1_stage1_bias_up, set_rx_ctrl4_amp1_stage1_bias_up: 3, 2;
+
+        /// ADC Amp2-4 stage1 bias UP.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub rx_ctrl4_adc_amp2_4_stage1_bias_up, set_rx_ctrl4_adc_amp2_4_stage1_bias_up: 1, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x5B, 0x5B);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x5C(u8);
+        impl Debug;
+
+        /// ADC Amp1 stage2 bias UP.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub rx_ctrl5_adc_amp1_stage2_bias_up, set_rx_ctrl5_adc_amp1_stage2_bias_up: 7, 6;
+
+        /// ADC Amp2-4 stage2 bias UP.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub rx_ctrl5_adc_amp2_4_stage2_bias_up, set_rx_ctrl5_adc_amp2_4_stage2_bias_up: 5, 4;
+
+        /// Quantizer bias UP.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub rx_ctrl5_quat_bias_up, set_rx_ctrl5_quat_bias_up: 3, 2;
+
+        /// Input Buffer bias UP.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub rx_ctrl5_inbuf_bias_up, set_rx_ctrl5_inbuf_bias_up: 1, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x5C, 0x5C);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x5D(u8);
+        impl Debug;
+
+        /// Bandgap Temperature Coefficient Control.
+        /// - 0111: Max.
+        /// - 0000: Nominal. (Default)
+        /// - 1000: Min.
+        pub ref_ctrl0_bandgap_temp_coef, set_ref_ctrl0_bandgap_temp_coef: 7, 4;
+
+        /// Bandgap Gain Control.
+        /// - 0111: Max.
+        /// - 0000: Nominal. (Default)
+        /// - 1000: Min.
+        pub ref_ctrl0_bandgap_gain, set_ref_ctrl0_bandgap_gain: 3, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x5D, 0x5D);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x5E(u8);
+        impl Debug;
+
+        /// Reference Amps bias adjust.
+        /// - 11: 15uA.
+        /// - 10: 10uA.
+        /// - 01: 40uA.
+        /// - 00: 20uA. (Default)
+        pub ref_ctrl1_reg_amps_bias_adj, set_ref_ctrl1_reg_amps_bias_adj: 7, 6;
+
+        /// Reference Amps bias UP.
+        /// - 11: 2.5X.
+        /// - 10: 2.0X.
+        /// - 01: 1.5X.
+        /// - 00: 1.0X. (Default)
+        pub ref_ctrl1_reg_amps_bias_up, set_ref_ctrl1_reg_amps_bias_up: 5, 4;
+
+        /// Reference Amps bias DOWN.
+        /// - 1111: Min bias.
+        /// - …
+        /// - 0000: Max bias. (Default)
+        pub ref_ctrl1_reg_amps_bias_down, set_ref_ctrl1_reg_amps_bias_down: 3, 0;
+    }
+    lmsreg!(RxLpfDacAdc0x5E, 0x5E);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct RxLpfDacAdc0x5F(u8);
+        impl Debug;
+
+        /// Power down DC offset comparators in DC offset cancellation block. Should be powered up only when DC offset cancellation algorithm is running.
+        /// - 1: Powered Down.
+        /// - 0: Enabled. (Default)
+        pub pd_dcocmp_lpf, set_pd_dcocmp_lpf: 7;
+
+        /// Enable DAC.
+        /// - 1: Enable. (Default)
+        /// - 0: Off.
+        pub misc_ctrl_dac_en, set_misc_ctrl_dac_en: 4;
+
+        /// Enable ADC1 (I Channel).
+        /// - 1: Enable. (Default)
+        /// - 0: Off.
+        pub misc_ctrl_adc1_en, set_misc_ctrl_adc1_en: 3;
+
+        /// Enable ADC2 (Q Channel).
+        /// - 1: Enable. (Default)
+        /// - 0: Off.
+        pub misc_ctrl_adc2_en, set_misc_ctrl_adc2_en: 2;
+
+        /// Enable ADC reference.
+        /// - 1: Enable. (Default)
+        /// - 0: Off.
+        pub misc_ctrl_adc_ref_en, set_misc_ctrl_adc_ref_en: 1;
+
+        /// Enable master reference.
+        /// - 1: Enable. (Default)
+        /// - 0: Off.
+        pub misc_ctrl_master_ref_en, set_misc_ctrl_master_ref_en: 0;
+    }
+    lmsreg!(RxLpfDacAdc0x5F, 0x5F);
+
+}
+
 mod rxvga2 {
     ////////////////////////////////////////////////////////////////////////
     // RX VGA2 Register                                                   //
@@ -844,8 +1301,8 @@ mod rxvga2 {
         impl Debug;
 
         /// Start calibration command of the module, selected by DC_ADDR.
-        // 1 – Start Calibration.
-        // 0 – Deactivate Start Calibration command. (Default)
+        // - 1: Start Calibration.
+        // - 0: Deactivate Start Calibration command. (Default)
         pub dc_start_clbr, set_dc_start_clbr: 5;
 
         /// Load value from DC_CNTVAL to module, selected by DC_ADDR.
@@ -1393,22 +1850,22 @@ pub fn into_debug(addr: u8, val: u8) -> ::error::Result<Box<Debug>> {
         ////////////////////////////////////////////////////////////////////
         // RX LPF, DAC, ADC                                               //
         ////////////////////////////////////////////////////////////////////
-        // 0x50
-        // 0x51
-        // 0x52
-        // 0x53
-        // 0x54
-        // 0x55
-        // 0x56
-        // 0x57
-        // 0x58
-        // 0x59
-        // 0x5A
-        // 0x5B
-        // 0x5C
-        // 0x5D
-        // 0x5E
-        // 0x5F
+        0x50 => Box::new(RxLpfDacAdc0x50(val)),
+        0x51 => Box::new(RxLpfDacAdc0x51(val)),
+        0x52 => Box::new(RxLpfDacAdc0x52(val)),
+        0x53 => Box::new(RxLpfDacAdc0x53(val)),
+        0x54 => Box::new(RxLpfDacAdc0x54(val)),
+        0x55 => Box::new(RxLpfDacAdc0x55(val)),
+        0x56 => Box::new(RxLpfDacAdc0x56(val)),
+        0x57 => Box::new(RxLpfDacAdc0x57(val)),
+        0x58 => Box::new(RxLpfDacAdc0x58(val)),
+        0x59 => Box::new(RxLpfDacAdc0x59(val)),
+        0x5A => Box::new(RxLpfDacAdc0x5A(val)),
+        0x5B => Box::new(RxLpfDacAdc0x5B(val)),
+        0x5C => Box::new(RxLpfDacAdc0x5C(val)),
+        0x5D => Box::new(RxLpfDacAdc0x5D(val)),
+        0x5E => Box::new(RxLpfDacAdc0x5E(val)),
+        0x5F => Box::new(RxLpfDacAdc0x5F(val)),
         ////////////////////////////////////////////////////////////////////
         // RX VGA2                                                        //
         ////////////////////////////////////////////////////////////////////
