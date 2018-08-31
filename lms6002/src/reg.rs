@@ -26,6 +26,7 @@ pub use self::pll::*;
 pub use self::rxfe::*;
 pub use self::rxvga2::*;
 pub use self::top::*;
+pub use self::txlpf::*;
 
 pub trait LmsReg: Debug + From<u8> + Into<u8> + Copy {
     fn addr() -> u8;
@@ -788,6 +789,180 @@ mod pll {
         pub pd_vcocomp_sx, set_pd_vcocomp_sx: 3;
     }
     pllreg!(Pll0x0B, 0x0B);
+}
+
+mod txlpf {
+    ////////////////////////////////////////////////////////////////////////
+    // TX LPF Registers                                                   //
+    ////////////////////////////////////////////////////////////////////////
+    pub use super::*;
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxLpf0x30(u8);
+        impl Debug;
+
+        /// Value from DC calibration module selected by DC_ADDR.
+        pub dc_regval, _: 5, 0;
+    }
+    lmsreg!(TxLpf0x30, 0x30);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxLpf0x31(u8);
+        impl Debug;
+
+        /// Lock pattern register.
+        /// Locked, when register value is neither "000" nor "111".
+        pub dc_lock, _: 4, 2;
+
+        /// indicates calibration status.
+        /// - 1: Calibration in progress.
+        /// - 0: Calibration is done.
+        pub dc_clbr_done, _: 1;
+
+        /// Value from DC module comparator, selected by DC_ADDR.
+        /// - 1: Count Up.
+        /// - 0: Count Down.
+        pub dc_ud, _: 0;
+    }
+    lmsreg!(TxLpf0x31, 0x31);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxLpf0x32(u8);
+        impl Debug;
+
+        /// Value to load into selected (by DC_ADDR) DC calibration module.
+        pub dc_cntval, set_dc_cntval: 5, 0;
+    }
+    lmsreg!(TxLpf0x32, 0x32);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxLpf0x33(u8);
+        impl Debug;
+
+        /// Start calibration command of module selected by DC_ADDR.
+        /// - 1: Start calibration.
+        /// - 0: Deactivate start calibration command. (Default)
+        pub dc_start_clbr, set_dc_start_clbr: 5;
+
+        /// Load value from DC_CNTVAL to module, selected by DC_ADDR.
+        /// - 1: Load Value.
+        /// - 0: Deactivate Load Value command. (Default)
+        pub dc_load, set_dc_load: 4;
+
+        /// Resets all DC Calibration modules.
+        /// - 1: Reset inactive. (Default)
+        /// - 0: Reset active.
+        pub dc_sreset, set_dc_sreset: 3;
+
+        /// Active calibration module address.
+        /// - 000: I filter.
+        /// - 001: Q filter.
+        /// - 010: 111 Not used.
+        pub dc_addr, set_dc_addr: 2, 0;
+    }
+    lmsreg!(TxLpf0x33, 0x33);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxLpf0x34(u8);
+        impl Debug;
+
+        /// LPF bandwidth control.
+        ///
+        /// code | Bandwidth [MHz]
+        /// -----|----------------
+        /// 0000 | 14 (Default)
+        /// 0001 | 10
+        /// 0010 | 7
+        /// 0011 | 6
+        /// 0100 | 5
+        /// 0101 | 4.375
+        /// 0110 | 3.5
+        /// 0111 | 3
+        /// 1000 | 2.75
+        /// 1001 | 2.5
+        /// 1010 | 1.92
+        /// 1011 | 1.5
+        /// 1100 | 1.375
+        /// 1101 | 1.25
+        /// 1110 | 0.875
+        /// 1111 | 0.75
+        pub bwc_lpf, set_bwc_lpf: 5, 2;
+
+        /// LPF modules enable.
+        /// - 0: LPF modules powered down.
+        /// - 1: LPF modules enabled. (Default)
+        pub en, set_en: 1;
+
+        /// Decode.
+        /// - 0: Decode control signals. (Default)
+        /// - 1: Use control signals from test mode registers.
+        pub decode, set_decode: 0;
+    }
+    lmsreg!(TxLpf0x34, 0x34);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxLpf0x35(u8);
+        impl Debug;
+
+        /// LPF bypass enable.
+        /// - 1: Bypass switches will bypass the LPF.
+        /// - 0: Normal operation. (Default)
+        pub byp_en_lpf, set_byp_en_lpf: 6;
+
+        /// Resistor calibration control for the DC offset cancellation DAC.
+        /// - 001100: (Default)
+        pub dco_daccal, set_dco_daccal: 5, 0;
+    }
+    lmsreg!(TxLpf0x35, 0x35);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxLpf0x36(u8);
+        impl Debug;
+
+        /// TX data DAC buffers power down.
+        /// - 0: Enabled. (Default)
+        /// - 1: Powered Down.
+        pub tx_dacbuf_pd, set_tx_dacbuf_pd: 7;
+
+        /// Calibration value, coming from TRX_LPF_CAL module.
+        /// - 011: (Default)
+        pub rccal_lpf, set_rccal_lpf: 6, 4;
+
+        /// Power down for the DAC in the DC offset cancellation block.
+        /// - 1: Powered Down.
+        /// - 0: Enabled. (Default)
+        pub pd_dcodac_lpf, set_pd_dcodac_lpf: 2;
+
+        /// Power down signal for the dc_ref_con3 block.
+        /// - 1: Powered Down.
+        /// - 0: Enabled. (Default)
+        pub pd_dcoref_lpf, set_pd_dcoref_lpf: 1;
+
+        /// Power down for the filter.
+        /// - 1: Powered Down.
+        /// - 0: Enabled. (Default)
+        pub pd_fil_lpf, set_pd_fil_lpf: 0;
+    }
+    lmsreg!(TxLpf0x36, 0x36);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxLpf0x3F(u8);
+        impl Debug;
+
+        /// Power down DC offset comparators in DC offset cancellation block. Should be powered up only when DC offset cancellation algorithm is running.
+        /// - 1: Powered Down.
+        /// - 0: Enabled. (Default)
+        pub pd_dcocmp_lpf, set_pd_dcocmp_lpf: 7;
+    }
+    lmsreg!(TxLpf0x3F, 0x3F);
 }
 
 mod adcdac {
@@ -1812,13 +1987,13 @@ pub fn into_debug(addr: u8, val: u8) -> ::error::Result<Box<Debug>> {
         ////////////////////////////////////////////////////////////////////
         // TX LPF                                                         //
         ////////////////////////////////////////////////////////////////////
-        // 0x30
-        // 0x31
-        // 0x32
-        // 0x33
-        // 0x34
-        // 0x35
-        // 0x36
+        0x30 => Box::new(TxLpf0x30(val)),
+        0x31 => Box::new(TxLpf0x31(val)),
+        0x32 => Box::new(TxLpf0x32(val)),
+        0x33 => Box::new(TxLpf0x33(val)),
+        0x34 => Box::new(TxLpf0x34(val)),
+        0x35 => Box::new(TxLpf0x35(val)),
+        0x36 => Box::new(TxLpf0x36(val)),
         // 0x37
         // 0x38
         // 0x39
@@ -1827,7 +2002,7 @@ pub fn into_debug(addr: u8, val: u8) -> ::error::Result<Box<Debug>> {
         // 0x3C
         // 0x3D
         // 0x3E
-        // 0x3F
+        0x3F => Box::new(TxLpf0x3F(val)),
         ////////////////////////////////////////////////////////////////////
         // TX RF                                                          //
         ////////////////////////////////////////////////////////////////////
