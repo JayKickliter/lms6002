@@ -27,6 +27,7 @@ pub use self::rxfe::*;
 pub use self::rxvga2::*;
 pub use self::top::*;
 pub use self::txlpf::*;
+pub use self::txrf::*;
 
 pub trait LmsReg: Debug + From<u8> + Into<u8> + Copy {
     fn addr() -> u8;
@@ -963,6 +964,301 @@ mod txlpf {
         pub pd_dcocmp_lpf, set_pd_dcocmp_lpf: 7;
     }
     lmsreg!(TxLpf0x3F, 0x3F);
+}
+
+mod txrf {
+    ////////////////////////////////////////////////////////////////////////
+    // TX RF modules configuration                                        //
+    ////////////////////////////////////////////////////////////////////////
+    pub use super::*;
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x40(u8);
+        impl Debug;
+
+        /// TXRF modules enable
+        /// - 0: TXRF modules powered down.
+        /// - 1: TXRF modules enabled. **(Default)**
+        pub en, set_en: 1;
+
+        /// Decode:
+        /// - 0: Decode control signals. **(Default)**
+        /// - 1: Use control signals from test mode registers.
+        pub decode, set_decode: 0;
+    }
+    lmsreg!(TxRf0x40, 0x40);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x41(u8);
+        impl Debug;
+
+        /// TXVGA1 gain, log-linear control. LSB=1dB, encoded as shown below.
+        /// Code  | Gain [dB]
+        /// ------|--------------
+        /// 00000 | -35
+        /// 00001 | -34
+        /// …     | …
+        /// 10101 | -14 **(Default)**
+        /// …	  | …
+        /// 11110 | -5
+        /// 11111 | -4
+        pub vga1gain, set_vga1gain: 4, 0;
+    }
+    lmsreg!(TxRf0x41, 0x41);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x42(u8);
+        impl Debug;
+
+        /// TXVGA1 DC shift control, LO leakage cancellation. LSB=0.0625mV, encoded as shown below.
+        /// Code     | DC Shift [mV]
+        /// ---------|---------------
+        /// 00000000 | -16
+        /// …        | …
+        /// 01111111 | -0.0625
+        /// 10000000 | 0 **(Default)**
+        /// 10000001 | 0.0625
+        /// …        | …
+        /// 11111111 | 15.9375
+        pub vga1dc_i, set_vga1dc_i: 7, 0;
+    }
+    lmsreg!(TxRf0x42, 0x42);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x43(u8);
+        impl Debug;
+
+        /// TXVGA1 DC shift control, LO leakage cancellation LSB=0.0625mV, encoded as shown below.
+        /// Code     | DC Shift [mV]
+        /// ---------|--------------
+        /// 00000000 | -16
+        /// …        | …
+        /// 01111111 | -0.0625
+        /// 10000000 | 0 **(Default)**
+        /// 10000001 | 0.0625
+        /// …        | …
+        /// 11111111 | 15.9375
+        pub vga1dc_q, set_vga1dc_q: 7, 0;
+    }
+    lmsreg!(TxRf0x43, 0x43);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x44(u8);
+        impl Debug;
+
+        /// VGA2 power amplifier (TX output) selection.
+        /// PA_EN{2:1] | PA1 | PA2
+        /// -----------|-----|--------------
+        /// 00         | OFF | OFF
+        /// 01         | ON  | OFF **(Default)**
+        /// 10         | OFF | ON
+        /// 11         | OFF | OFF
+        pub pa_vga2_en, set_vga2_en: 4, 2;
+
+        /// AUXPA, auxiliary (RF loopack) PA power down.
+        /// - 0: Powered up. **(Default)**
+        /// - 1: Powered down.
+        pub pa_augpa_en, set_augpa_en: 2;
+    }
+    lmsreg!(TxRf0x44, 0x44);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x45(u8);
+        impl Debug;
+
+        /// TXVGA2 gain control, log-linear control. LSB=1dB, encoded as shown below.
+        /// Code  | Gain [dB]
+        /// ------|------------
+        /// 00000 | 0 **(Default)**
+        /// 00001 | 1
+        /// 11001 | 25 ...
+        /// 11111 | 25
+        pub vga2gain, set_vga2gain: 7, 3;
+
+        /// Selects the signal for AC coupling, MUX provides:
+        /// - 0: Reference DC generated inside the selected detector. **(Default)**
+        /// - 1: Average of the selected detector output.
+        pub envd_sig, set_envd_sig: 2;
+
+        /// Detector select, MUX provides
+        /// - 00: AUXPA envelop detector output **(Default)**
+        /// - 01: AUXPA peak detector output.
+        /// - 10: PA1 envelop detector output.
+        /// - 11: PA2 envelop detector output.
+        pub envd_det, set_envd_det: 1, 0;
+    }
+    lmsreg!(TxRf0x45, 0x45);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x46(u8);
+        impl Debug;
+
+        /// Controls the bandwidth of the envelop and peak detectors.
+        /// - 0000: Minimum bandwidth, envelop ~1MHz, peak 30kHz. **(Default)**
+        /// - 1111: Maximum bandwidth, envelop ~15MHz, peak ~300KHz.
+        pub pkdbw, set_pkdbw: 7, 4;
+
+        /// Base band loopback switches control.
+        /// - 00: Switch open. **(Default)**
+        /// - 11: Switch closed.
+        pub loopbben, set_loopbben: 3, 2;
+
+        /// Shorts the resistor in the envelop/peak detector to speed up charging for faster response.
+        ///
+        /// After the initial charge up, it should be disabled to achieve a LPF function.
+        ///
+        /// - 0: Switch open, LPF function in effect. **(Default)**
+        /// - 1: Resistor shorted (no LPF function).
+        pub fst_pkdet, set_fst_pkdet: 1;
+
+        /// Bias stage of high frequency TX part has
+        /// large resistors to filter the noise.
+        ///
+        /// However, they create large settling time. This switch can
+        /// be used to short those resistors during the initialization
+        /// and then it may be needed to open it to filter the noise,
+        /// in case the noise is too high.
+        ///
+        /// - 0: Switch open (noise filtering functional). **(Default)**
+        /// - 1: Resistors shorted (short settling - no noise filtering).
+        pub fst_txhfbias, set_fst_txhfbias: 0;
+    }
+    lmsreg!(TxRf0x46, 0x46);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x47(u8);
+        impl Debug;
+
+        /// Controls the bias current of the LO buffer.
+        ///
+        /// Higher current will increase the linearity. LSB=5/6mA.
+        /// - 0000: Minimum current.
+        /// - 0110: TXMIX takes 5mA for buffer. **(Default)**
+        /// - 1111: Maximum current.
+        pub ict_txlobuf, set_ict_txlobuf: 7, 4;
+
+        /// The linearity of PAs depends on the bias at the base of the cascode NPNs in the PA cells.
+        ///
+        /// Increasing the VBCAS will lower the base of the cascode NPN.
+        ///
+        /// - 0000: Maximum base voltage. **(Default)**
+        /// - 1111: Minimum base voltage.
+        pub vbcas_txdrv, set_vbcas_txdrv: 3, 0;
+    }
+    lmsreg!(TxRf0x47, 0x47);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x48(u8);
+        impl Debug;
+
+        /// Controls the bias current of the mixer.
+        ///
+        /// Higher current will increase the linearity. LSB=1mA.
+        /// - 00000: 0mA.
+        /// - 01100: TXMIX takes 12mA for each cell. **(Default)**
+        /// - 11111: 31mA.
+        pub ict_txmix, set_ict_txmix: 4, 0;
+    }
+    lmsreg!(TxRf0x48, 0x48);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x49(u8);
+        impl Debug;
+        /// Controls the bias current of the PAs.
+        ///
+        /// Higher current will increase the linearity. LSB=1mA.
+        /// - 00000: 0mA.
+        /// - 01100: PAs take 12mA for each cell. **(Default)**
+        /// - 11111: 31mA.
+        pub ict_txdrv, set_ict_txdrv: 4, 0;
+    }
+    lmsreg!(TxRf0x49, 0x49);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x4A(u8);
+        impl Debug;
+
+        /// VGA1, I channel power control.
+        /// - 0: Powered down.
+        /// - 1: Powered up. **(Default)**
+        pub pw_vga1_i, set_pw_vga1_i: 4;
+
+        ///  VGA1, Q channel power control.
+        /// - 0: Powered down.
+        /// - 1: Powered up. **(Default)**
+        pub pw_vga1_q, set_pw_vga1_q: 3;
+
+        ///  Power down for PAs and AUXPA.
+        /// - 0: PA1, PA2 and AUXPA can be separately controlled. **(Default)**
+        /// - 1: PA1, PA2 and AUXPA all disabled
+        pub pd_txdrv, set_pd_txdrv: 2;
+
+        ///  Power down for TXLOBUF.
+        /// - 0: Powered up. **(Default)**
+        /// - 1: Powered down.
+        pub pd_txlobuf, set_pd_txlobuf: 1;
+
+        /// Power down for TXMIX.
+        /// - 0: Powered up. **(Default)**
+        /// - 1: Powered down.
+        pub pd_txmix, set_pd_txmix: 0;
+    }
+    lmsreg!(TxRf0x4A, 0x4A);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x4B(u8);
+        impl Debug;
+
+        /// TXVGA1 gain control, raw access. LSB=1dB, encoded as shown below.
+        ///
+        /// Code  | Gain [dB]
+        /// ------|--------------
+        /// 00000 | -35
+        /// 00001 | -34
+        /// …a    | …a
+        /// 10101 | -14 **(Default)**
+        /// …a    | …a
+        /// 11110 | -5
+        /// 11111 | -4
+        pub vga1gaint, set_vga1gaint: 7, 0;
+    }
+    lmsreg!(TxRf0x4B, 0x4B);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x4C(u8);
+        impl Debug;
+
+        /// Controls the gain of PA1, PA2 and AUXPA, raw access.
+        /// - For PA1, PA2:
+        /// - For AUXPA: Only 4 LSBs are used, max gain ~22dB.
+        pub g_txvga2, set_g_txvga2: 7, 0;
+    }
+    lmsreg!(TxRf0x4C, 0x4C);
+
+    bitfield!{
+        #[derive(Clone, Copy)]
+        pub struct TxRf0x4D(u8);
+        impl Debug;
+
+        /// Power down for envelop/peak detectors.
+        /// - 0: Powered up. **(Default)**
+        /// - 1: Powered down.
+        pub pd_pkdet, set_pd_pkdet: 7;
+    }
+    lmsreg!(TxRf0x4D, 0x4D);
 }
 
 mod adcdac {
@@ -2006,20 +2302,20 @@ pub fn into_debug(addr: u8, val: u8) -> ::error::Result<Box<Debug>> {
         ////////////////////////////////////////////////////////////////////
         // TX RF                                                          //
         ////////////////////////////////////////////////////////////////////
-        // 0x40
-        // 0x41
-        // 0x42
-        // 0x43
-        // 0x44
-        // 0x45
-        // 0x46
-        // 0x47
-        // 0x48
-        // 0x49
-        // 0x4A
-        // 0x4B
-        // 0x4C
-        // 0x4D
+        0x40 => Box::new(TxRf0x40(val)),
+        0x41 => Box::new(TxRf0x41(val)),
+        0x42 => Box::new(TxRf0x42(val)),
+        0x43 => Box::new(TxRf0x43(val)),
+        0x44 => Box::new(TxRf0x44(val)),
+        0x45 => Box::new(TxRf0x45(val)),
+        0x46 => Box::new(TxRf0x46(val)),
+        0x47 => Box::new(TxRf0x47(val)),
+        0x48 => Box::new(TxRf0x48(val)),
+        0x49 => Box::new(TxRf0x49(val)),
+        0x4A => Box::new(TxRf0x4A(val)),
+        0x4B => Box::new(TxRf0x4B(val)),
+        0x4C => Box::new(TxRf0x4C(val)),
+        0x4D => Box::new(TxRf0x4D(val)),
         // 0x4E
         // 0x4F
         ////////////////////////////////////////////////////////////////////
