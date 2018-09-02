@@ -120,28 +120,39 @@ impl<I: Interface> LMS6002<I> {
         Ok(())
     }
 
-    fn tuning_params<M: reg::PllMod>(&self, _m: M) -> Result<algo::TuningParams> {
-        use reg::*;
+    fn tuning_params(&self, path: Path) -> Result<algo::TuningParams> {
+        fn tuning_params<M: reg::PllMod, N: Interface>(
+            lms: &LMS6002<N>,
+            _m: M,
+        ) -> Result<algo::TuningParams> {
+            use reg::*;
 
-        let pll0 = self.read_reg::<PllReg<Pll0x00, M>>()?.0;
-        let pll1 = self.read_reg::<PllReg<Pll0x01, M>>()?.0;
-        let pll2 = self.read_reg::<PllReg<Pll0x02, M>>()?.0;
-        let pll3 = self.read_reg::<PllReg<Pll0x03, M>>()?.0;
+            let pll0 = lms.read_reg::<PllReg<Pll0x00, M>>()?.0;
+            let pll1 = lms.read_reg::<PllReg<Pll0x01, M>>()?.0;
+            let pll2 = lms.read_reg::<PllReg<Pll0x02, M>>()?.0;
+            let pll3 = lms.read_reg::<PllReg<Pll0x03, M>>()?.0;
 
-        let pll5 = self.read_reg::<PllReg<Pll0x05, M>>()?.0;
-        Ok(algo::TuningParams {
-            selvco: pll5.selvco(),
-            frange: pll5.frange(),
-            nint: (u16::from(pll0.nint_8_1()) << 1) | u16::from(pll1.nint_0()),
-            nfrac: ((u32::from(pll1.nfrac_22_16())) << 16)
-                | ((u32::from(pll2.nfrac_15_8())) << 8)
-                | u32::from(pll3.nfrac_7_0()),
-        })
+            let pll5 = lms.read_reg::<PllReg<Pll0x05, M>>()?.0;
+            Ok(algo::TuningParams {
+                selvco: pll5.selvco(),
+                frange: pll5.frange(),
+                nint: (u16::from(pll0.nint_8_1()) << 1) | u16::from(pll1.nint_0()),
+                nfrac: ((u32::from(pll1.nfrac_22_16())) << 16)
+                    | ((u32::from(pll2.nfrac_15_8())) << 8)
+                    | u32::from(pll3.nfrac_7_0()),
+            })
+        }
+        let params = match path {
+            Path::RX => tuning_params(self, reg::RxPll)?,
+            Path::TX => tuning_params(self, reg::TxPll)?,
+        };
+        debug!("Read {:?} tuning params: {:?}", path, params);
+        Ok(params)
     }
 
     /// Returns `path`'s current frequency.
-    pub fn freq<M: reg::PllMod>(&self, m: M) -> Result<f64> {
-        let params = self.tuning_params(m)?;
+    pub fn freq(&self, path: Path) -> Result<f64> {
+        let params = self.tuning_params(path)?;
         Ok(algo::params_to_freq(self.clk, &params))
     }
 

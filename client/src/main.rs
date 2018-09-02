@@ -41,13 +41,12 @@ fn try_main(opts: Opts) -> error::Result {
         Cmd::rxpll(TRxCmd::freq { freq: Some(freq) }) => lms.set_freq(Path::RX, freq)?,
         Cmd::txpll(TRxCmd::freq { freq: Some(freq) }) => lms.set_freq(Path::TX, freq)?,
         Cmd::rxpll(TRxCmd::freq { freq: None }) => {
-            println!("{:.1}", lms.freq(lms6002::reg::RxPll)?);
+            println!("{:.1}", lms.freq(Path::RX)?);
         }
         Cmd::txpll(TRxCmd::freq { freq: None }) => {
-            println!("{:.1}", lms.freq(lms6002::reg::TxPll)?);
+            println!("{:.1}", lms.freq(Path::TX)?);
         }
     };
-
     Ok(())
 }
 
