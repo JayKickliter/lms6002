@@ -38,12 +38,12 @@ fn try_main(opts: Opts) -> error::Result {
     let lms = lms6002::LMS6002::new(iface, 40_000_000);
     match opts.cmd {
         Cmd::reg(cmd) => reg_cmd(&lms, &cmd)?,
-        Cmd::rx(TRxCmd::enable) => lms.trx_enable(Path::RX, true)?,
-        Cmd::tx(TRxCmd::enable) => lms.trx_enable(Path::TX, true)?,
-        Cmd::rx(TRxCmd::disable) => lms.trx_enable(Path::RX, false)?,
-        Cmd::tx(TRxCmd::disable) => lms.trx_enable(Path::TX, false)?,
-        Cmd::rx(TRxCmd::tune { freq }) => lms.set_freq(Path::RX, freq)?,
-        Cmd::tx(TRxCmd::tune { freq }) => lms.set_freq(Path::TX, freq)?,
+        Cmd::rxpll(TRxCmd::enable) => lms.trx_enable(Path::RX, true)?,
+        Cmd::txpll(TRxCmd::enable) => lms.trx_enable(Path::TX, true)?,
+        Cmd::rxpll(TRxCmd::disable) => lms.trx_enable(Path::RX, false)?,
+        Cmd::txpll(TRxCmd::disable) => lms.trx_enable(Path::TX, false)?,
+        Cmd::rxpll(TRxCmd::tune { freq }) => lms.set_freq(Path::RX, freq)?,
+        Cmd::txpll(TRxCmd::tune { freq }) => lms.set_freq(Path::TX, freq)?,
         _ => unimplemented!(),
     };
 

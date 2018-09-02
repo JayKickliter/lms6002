@@ -50,10 +50,10 @@ pub struct Opts {
 #[derive(Debug, StructOpt)]
 pub enum Cmd {
     /// Configure the Rx path
-    rx(TRxCmd),
+    rxpll(TRxCmd),
 
     /// Configure the Rx path
-    tx(TRxCmd),
+    txpll(TRxCmd),
 
     /// Direct register manipulation
     reg(RegCmd),
