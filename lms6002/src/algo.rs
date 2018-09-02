@@ -51,7 +51,13 @@ fn test_freqsel() {
     }
 }
 
-pub fn freq_to_params(refclk: u32, freq: f64) -> Result<TuningParams> {
+pub fn params_to_freq(refclk: u32, f: &TuningParams) -> f64 {
+    let x = 2u32.pow((u32::from(u8::from(f.frange))) - 3);
+    (f64::from(f.nint) + f64::from(f.nfrac) / f64::from(1 << 23))
+        * (f64::from(refclk) / f64::from(x))
+}
+
+pub fn params_from_freq(refclk: u32, freq: f64) -> Result<TuningParams> {
     // For wanted LO frequency f_lo and given PLL reference clock
     // frequency f_ref, calculate integer and fractional part of the
     // divider as below.
@@ -78,14 +84,9 @@ fn test_freq_to_params() {
     // "LMS6002 – Wide Band Multi Standard Radio Chip - Programming and Calibration Guide"
     const REFCLK: u32 = 30_720_000;
     let freq = 2_140_000_000.0;
-    let TuningParams {
-        selvco,
-        frange,
-        nint,
-        nfrac,
-    } = freq_to_params(REFCLK, freq).unwrap();
-    assert_eq!(selvco, SelVco::from(0b100));
-    assert_eq!(frange, FRange::from(0b100));
-    assert_eq!(nint, 139);
-    assert_eq!(nfrac, 2708821);
+    let p = params_from_freq(REFCLK, freq).unwrap();
+    assert_eq!(p.selvco, SelVco::from(0b100));
+    assert_eq!(p.frange, FRange::from(0b100));
+    assert_eq!(p.nint, 139);
+    assert_eq!(p.nfrac, 2708821);
 }

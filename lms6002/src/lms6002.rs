@@ -120,14 +120,34 @@ impl<I: Interface> LMS6002<I> {
         Ok(())
     }
 
+    fn tuning_params<M: reg::PllMod>(&self, _m: M) -> Result<algo::TuningParams> {
+        use reg::*;
+
+        let pll0 = self.read_reg::<PllReg<Pll0x00, M>>()?.0;
+        let pll1 = self.read_reg::<PllReg<Pll0x01, M>>()?.0;
+        let pll2 = self.read_reg::<PllReg<Pll0x02, M>>()?.0;
+        let pll3 = self.read_reg::<PllReg<Pll0x03, M>>()?.0;
+
+        let pll5 = self.read_reg::<PllReg<Pll0x05, M>>()?.0;
+        Ok(algo::TuningParams {
+            selvco: pll5.selvco(),
+            frange: pll5.frange(),
+            nint: (u16::from(pll0.nint_8_1()) << 1) | u16::from(pll1.nint_0()),
+            nfrac: ((u32::from(pll1.nfrac_22_16())) << 16)
+                | ((u32::from(pll2.nfrac_15_8())) << 8)
+                | u32::from(pll3.nfrac_7_0()),
+        })
+    }
+
     /// Returns `path`'s current frequency.
-    pub fn freq(&self, _path: Path) -> Result<f64> {
-        unimplemented!()
+    pub fn freq<M: reg::PllMod>(&self, m: M) -> Result<f64> {
+        let params = self.tuning_params(m)?;
+        Ok(algo::params_to_freq(self.clk, &params))
     }
 
     /// Tunes specified `path` to `freq`.
     pub fn set_freq(&self, path: Path, freq: f64) -> Result<()> {
-        let params = algo::freq_to_params(self.clk, freq)?;
+        let params = algo::params_from_freq(self.clk, freq)?;
         info!("Tuning {:?} path to {} using {:?}", path, freq, params);
 
         use reg::*;
