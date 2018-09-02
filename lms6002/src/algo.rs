@@ -90,3 +90,46 @@ fn test_freq_to_params() {
     assert_eq!(p.nint, 139);
     assert_eq!(p.nfrac, 2708821);
 }
+
+const LPF_LUT: [(f64, u8); 16] = [
+    (14e6, 0b0000),
+    (10e6, 0b0001),
+    (7e6, 0b0010),
+    (6e6, 0b0011),
+    (5e6, 0b0100),
+    (4.375e6, 0b0101),
+    (3.5e6, 0b0110),
+    (3e6, 0b0111),
+    (2.75e6, 0b1000),
+    (2.5e6, 0b1001),
+    (1.92e6, 0b1010),
+    (1.5e6, 0b1011),
+    (1.375e6, 0b1100),
+    (1.25e6, 0b1101),
+    (0.875e6, 0b1110),
+    (0.75e6, 0b1111),
+];
+
+pub fn bwc_from_bw(freq: f64) -> Result<u8> {
+    LPF_LUT
+        .iter()
+        .find(|&&(f, _)| f <= freq)
+        .map(|&(_, val)| val)
+        .ok_or(Error::Range)
+}
+
+pub fn bw_from_bwc(bwc: u8) -> Result<f64> {
+    LPF_LUT
+        .iter()
+        .find(|&&(_, b)| b == bwc)
+        .map(|&(f, _)| f)
+        .ok_or(Error::Range)
+}
+
+#[cfg(test)]
+#[test]
+fn test_bwc_from_bw() {
+    for (freq, regval) in &LPF_LUT {
+        assert_eq!(Ok(*regval), bwc_from_bw(*freq));
+    }
+}

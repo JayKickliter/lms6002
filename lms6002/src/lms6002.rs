@@ -314,4 +314,25 @@ impl<I: Interface> LMS6002<I> {
 
         Ok(())
     }
+
+    /// Returns `path`'s low-pass filter bandwidth (in Hz).
+    pub fn lpf_bw(&self, path: Path) -> Result<f64> {
+        let bwc = match path {
+            Path::RX => self.read_reg::<reg::RxLpfDacAdc0x54>()?.bwc_lpf(),
+            Path::TX => self.read_reg::<reg::TxLpf0x34>()?.bwc_lpf(),
+        };
+        let bw = algo::bw_from_bwc(bwc)?;
+        info!("Read {} for {:?} LPF bandwidth", bw, path);
+        Ok(bw)
+    }
+
+    /// Sets specified `path`'s low-pass filter to `bw`.
+    pub fn set_lpf_bw(&self, path: Path, bw: f64) -> Result<()> {
+        let bwc = algo::bwc_from_bw(bw)?;
+        info!("Setting {:?} LPF to {:#04b} ({} Hz)", path, bwc, bw);
+        match path {
+            Path::RX => self.rmw_reg(|r: &mut reg::RxLpfDacAdc0x54| r.set_bwc_lpf(bwc)),
+            Path::TX => self.rmw_reg(|r: &mut reg::TxLpf0x34| r.set_bwc_lpf(bwc)),
+        }
+    }
 }
