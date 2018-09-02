@@ -34,12 +34,9 @@ impl_from_hex_dec_bin!(u8);
 #[derive(StructOpt, Debug)]
 pub struct Opts {
     #[structopt(
-        short = "d",
-        long = "spidev",
-        env = "LMS_DEV",
-        help = "Path to SPI device",
-        parse(from_os_str)
+        parse(from_os_str), short = "d", long = "spidev", env = "LMS_DEV", name = "SPIDEV"
     )]
+    /// Path to Spidev, e.g. `/dev/spidev1.0`
     pub dev: PathBuf,
 
     #[structopt(subcommand)]
@@ -49,10 +46,10 @@ pub struct Opts {
 /// Top-level commands.
 #[derive(Debug, StructOpt)]
 pub enum Cmd {
-    /// Configure the Rx path
+    /// Configure RX PLL
     rxpll(TRxCmd),
 
-    /// Configure the Rx path
+    /// Configure TX PLL
     txpll(TRxCmd),
 
     /// Direct register manipulation
@@ -66,10 +63,12 @@ pub enum TRxCmd {
     enable,
     /// Soft-disable this path
     disable,
-    /// Soft-reset this path
-    reset,
-    /// Tune to specified frequency
-    tune { freq: f64 },
+    /// Set/get current frequency
+    freq {
+        #[structopt(short = "f", long = "freq", name = "FREQ")]
+        /// Tune to specified freq
+        freq: Option<f64>,
+    },
 }
 
 /// Low-level register command

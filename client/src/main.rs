@@ -42,9 +42,10 @@ fn try_main(opts: Opts) -> error::Result {
         Cmd::txpll(TRxCmd::enable) => lms.trx_enable(Path::TX, true)?,
         Cmd::rxpll(TRxCmd::disable) => lms.trx_enable(Path::RX, false)?,
         Cmd::txpll(TRxCmd::disable) => lms.trx_enable(Path::TX, false)?,
-        Cmd::rxpll(TRxCmd::tune { freq }) => lms.set_freq(Path::RX, freq)?,
-        Cmd::txpll(TRxCmd::tune { freq }) => lms.set_freq(Path::TX, freq)?,
-        _ => unimplemented!(),
+        Cmd::rxpll(TRxCmd::freq { freq: Some(freq) }) => lms.set_freq(Path::RX, freq)?,
+        Cmd::txpll(TRxCmd::freq { freq: Some(freq) }) => lms.set_freq(Path::TX, freq)?,
+        Cmd::rxpll(TRxCmd::freq { freq: None }) => unimplemented!(),
+        Cmd::txpll(TRxCmd::freq { freq: None }) => unimplemented!(),
     };
 
     Ok(())
