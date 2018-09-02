@@ -42,13 +42,13 @@ impl<I: Interface> LMS6002<I> {
     pub fn read_reg<T: reg::LmsReg>(&self) -> Result<T> {
         let addr = T::addr();
         let reg = self.read(addr)?.into();
-        trace!("Read {:?} from 0x{:02x}", reg, addr);
+        trace!("Read {:?} from {:#02x}", reg, addr);
         Ok(reg)
     }
 
     /// Writes a single LMS6002 register.
     pub fn write_reg<T: reg::LmsReg>(&self, reg: T) -> Result<()> {
-        trace!("Writing {:?} to 0x{:02x}", reg, T::addr());
+        trace!("Writing {:?} to {:#02x}", reg, T::addr());
         self.write(T::addr(), reg.into())?;
         Ok(())
     }
@@ -59,7 +59,7 @@ impl<I: Interface> LMS6002<I> {
         T: reg::LmsReg,
         F: FnOnce(&mut T),
     {
-        trace!("Performing RMW on LMS register at 0x{:02x}", T::addr());
+        trace!("Performing RMW on LMS register at {:#02x}", T::addr());
         let mut r: T = self.read_reg()?;
         op(&mut r);
         self.write_reg(r)?;
