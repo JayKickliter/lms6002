@@ -121,7 +121,7 @@ impl<I: Interface> LMS6002<I> {
     }
 
     /// Returns `path`'s current frequency.
-    pub fn freq(&self, _path: Path) -> Result<()> {
+    pub fn freq(&self, _path: Path) -> Result<f64> {
         unimplemented!()
     }
 
