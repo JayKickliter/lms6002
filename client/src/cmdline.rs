@@ -63,9 +63,9 @@ pub enum TRxCmd {
     enable,
     /// Soft-disable this path
     disable,
-    /// Set/get current frequency
+    /// Get or set current frequency
     freq {
-        #[structopt(short = "f", long = "freq", name = "FREQ")]
+        #[structopt(long = "set", name = "FREQ")]
         /// Tune to specified freq
         freq: Option<f64>,
     },
