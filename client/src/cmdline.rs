@@ -33,7 +33,13 @@ impl_from_hex_dec_bin!(u8);
 
 #[derive(StructOpt, Debug)]
 pub struct Opts {
-    #[structopt(parse(from_os_str))]
+    #[structopt(
+        short = "d",
+        long = "spidev",
+        env = "LMS_DEV",
+        help = "Path to SPI device",
+        parse(from_os_str)
+    )]
     pub dev: PathBuf,
 
     #[structopt(subcommand)]
