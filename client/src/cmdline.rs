@@ -52,6 +52,12 @@ pub enum Cmd {
     /// Configure TX PLL
     txpll(TRxCmd),
 
+    /// Configure RX LPF
+    rxlpf(LpfCmd),
+
+    /// Configure TX LPF
+    txlpf(LpfCmd),
+
     /// Direct register manipulation
     reg(RegCmd),
 }
@@ -86,4 +92,11 @@ pub enum RegCmd {
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
         val: u8,
     },
+}
+
+#[derive(Debug, StructOpt)]
+pub struct LpfCmd {
+    // Set LPF to specified cutoff freq
+    #[structopt(long = "set", name = "FREQ")]
+    pub freq: Option<f64>,
 }

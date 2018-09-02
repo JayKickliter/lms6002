@@ -46,6 +46,10 @@ fn try_main(opts: Opts) -> error::Result {
         Cmd::txpll(TRxCmd::freq { freq: None }) => {
             println!("{:.1}", lms.freq(Path::TX)?);
         }
+        Cmd::rxlpf(LpfCmd { freq: Some(freq) }) => lms.set_lpf_bw(Path::RX, freq)?,
+        Cmd::txlpf(LpfCmd { freq: Some(freq) }) => lms.set_lpf_bw(Path::TX, freq)?,
+        Cmd::rxlpf(LpfCmd { freq: None }) => println!("{:}", lms.lpf_bw(Path::RX)?),
+        Cmd::txlpf(LpfCmd { freq: None }) => println!("{:}", lms.lpf_bw(Path::TX)?),
     };
     Ok(())
 }
