@@ -56,6 +56,24 @@ macro_rules! lmsreg {
     };
 }
 
+pub trait DcRegValReg {
+    fn regval(&self) -> u8;
+    fn set_regval(&mut self, val: u8);
+}
+
+macro_rules! dc_regval_reg {
+    ($reg:tt) => {
+        impl DcRegValReg for $reg {
+            fn regval(&self) -> u8 {
+                self.dc_regval()
+            }
+            fn set_regval(&mut self, val: u8) {
+                self.set_dc_regval(val);
+            }
+        }
+    };
+}
+
 pub trait DcCalStatusReg {
     fn lock(&self) -> bool;
     fn clbr_done(&self) -> bool;
@@ -111,9 +129,10 @@ mod top {
         impl Debug;
 
         /// Value from DC calibration module selected by `DC_ADDR`.
-        pub dc_regval, _: 5, 0;
+        pub dc_regval, set_dc_regval: 5, 0;
     }
     lmsreg!(Top0x00, 0x00);
+    dc_regval_reg!(Top0x00);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -848,9 +867,10 @@ mod txlpf {
         impl Debug;
 
         /// Value from DC calibration module selected by DC_ADDR.
-        pub dc_regval, _: 5, 0;
+        pub dc_regval, set_dc_regval: 5, 0;
     }
     lmsreg!(TxLpf0x30, 0x30);
+    dc_regval_reg!(TxLpf0x30);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -1319,9 +1339,10 @@ mod adcdac {
         impl Debug;
 
         /// Value from DC Calibration module, selected by DC_ADDR.
-        pub dc_regval, _: 5, 0;
+        pub dc_regval, set_dc_regval: 5, 0;
     }
     lmsreg!(RxLpfDacAdc0x50, 0x50);
+    dc_regval_reg!(RxLpfDacAdc0x50);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -1777,9 +1798,10 @@ mod rxvga2 {
         impl Debug;
 
         /// Value from DC Calibration module selected by DC_ADDR.
-        pub dc_regval, _: 5, 0;
+        pub dc_regval, set_dc_regval: 5, 0;
     }
     lmsreg!(RxVga0x60, 0x60);
+    dc_regval_reg!(RxVga0x60);
 
     bitfield!{
         #[derive(Clone, Copy)]
