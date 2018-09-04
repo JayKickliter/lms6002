@@ -29,7 +29,7 @@ fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) -> error:
 }
 
 fn try_main(opts: Opts) -> error::Result {
-    use lms6002::Path;
+    use lms6002::{DcCalMod, Path};
     let iface = interface::Interface::open(opts.dev)?;
     let lms = lms6002::LMS6002::new(iface, 40_000_000);
     match opts.cmd {
@@ -50,6 +50,12 @@ fn try_main(opts: Opts) -> error::Result {
         Cmd::txlpf(LpfCmd { freq: Some(freq) }) => lms.set_lpf_bw(Path::TX, freq)?,
         Cmd::rxlpf(LpfCmd { freq: None }) => println!("{:}", lms.lpf_bw(Path::RX)?),
         Cmd::txlpf(LpfCmd { freq: None }) => println!("{:}", lms.lpf_bw(Path::TX)?),
+        Cmd::cal(module) => match module {
+            CalCmd::lpftuning => lms.dc_cal(DcCalMod::LpfTuning)?,
+            CalCmd::rxlpf => lms.dc_cal(DcCalMod::RxLpf(None))?,
+            CalCmd::txlpf => lms.dc_cal(DcCalMod::TxLpf(None))?,
+            CalCmd::rxvga2 => lms.dc_cal(DcCalMod::RxVga2(None))?,
+        },
     };
     Ok(())
 }

@@ -64,6 +64,9 @@ pub enum Cmd {
 
     /// Direct register manipulation
     reg(RegCmd),
+
+    /// Calibration
+    cal(CalCmd),
 }
 
 /// High-level commands specific to Tx/Rx path
@@ -103,4 +106,12 @@ pub struct LpfCmd {
     // Set LPF to specified cutoff freq
     #[structopt(long = "set", name = "FREQ")]
     pub freq: Option<f64>,
+}
+
+#[derive(Debug, StructOpt)]
+pub enum CalCmd {
+    lpftuning,
+    rxlpf,
+    txlpf,
+    rxvga2,
 }
