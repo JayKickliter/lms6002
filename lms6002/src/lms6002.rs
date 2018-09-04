@@ -237,7 +237,7 @@ impl<I: Interface> LMS6002<I> {
                     (Some(_), None, InRange) => continue,
                     t @ (Some(_), None, Low) => {
                         debug!("VTune transitioned to {:?}", t.2);
-                        capval_high = Some(capval);
+                        capval_high = Some(capval - 1);
                         break;
                     }
                     t => {
@@ -250,8 +250,8 @@ impl<I: Interface> LMS6002<I> {
             if let (Some(capval_low), Some(capval_high)) = (capval_low, capval_high) {
                 let capval_middle = (capval_low + capval_high) / 2;
                 debug!(
-                    "Selected VCOCAP {:2} (Low: {:2} High: {:2})",
-                    capval_middle, capval_low, capval_high
+                    "Selected VCOCAP: (Low: {:2} < Selected: {:2} < High: {:2})",
+                    capval_low, capval_middle, capval_high
                 );
                 Ok(())
             } else {
