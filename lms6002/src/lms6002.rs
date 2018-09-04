@@ -2,6 +2,8 @@ use algo;
 use error::*;
 use interface::Interface;
 use reg;
+use std::thread;
+use std::time;
 
 /// A high-level interface for configuring and controlling an LMS6002.
 #[derive(Debug)]
@@ -334,5 +336,148 @@ impl<I: Interface> LMS6002<I> {
             Path::RX => self.rmw_reg(|r: &mut reg::RxLpfDacAdc0x54| r.set_bwc_lpf(bwc)),
             Path::TX => self.rmw_reg(|r: &mut reg::TxLpf0x34| r.set_bwc_lpf(bwc)),
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(u8)]
+pub enum LpfDcCalChan {
+    I = 0,
+    Q = 1,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(u8)]
+pub enum RxVga2DcCalChan {
+    DcRef = 0b000,
+    FirstStageI = 0b001,
+    FirstStageQ = 0b010,
+    SecondStageI = 0b011,
+    SecondStageQ = 0b100,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum DcCalMod {
+    LpfTuning,
+    RxLpf(Option<LpfDcCalChan>),
+    TxLpf(Option<LpfDcCalChan>),
+    RxVga2(Option<RxVga2DcCalChan>),
+}
+
+impl DcCalMod {
+    fn set_clk(self, reg: reg::Top0x09, en: bool) -> reg::Top0x09 {
+        let mut reg = reg;
+        match self {
+            DcCalMod::LpfTuning => reg.set_lpf_cal_clk_en(en),
+            DcCalMod::RxLpf(_) => reg.set_rx_lpf_dccal_clk_en(en),
+            DcCalMod::TxLpf(_) => reg.set_tx_lpf_spi_dccal_clk_en(en),
+            DcCalMod::RxVga2(_) => reg.set_rx_vga2_dccal_en(en),
+        };
+        reg
+    }
+}
+
+impl<I: Interface> LMS6002<I> {
+    /// Genereral DC calibration procedure.
+    ///
+    /// This function is backbone of all other module-specific DC
+    /// calibration subroutines. It is outlined in "LMS6002
+    /// Programming and Calibration",
+    /// [Sec. 4.1](https://wiki.myriadrf.org/LimeMicro:LMS6002D_Programming_and_Calibration#General_DC_Calibration_Procedure)
+    pub fn general_dc_cal<S, C>(&self, addr: u8) -> Result<()>
+    where
+        C: reg::DcCalControlReg + reg::LmsReg,
+        S: reg::DcCalStatusReg + reg::LmsReg,
+    {
+        // Max number tries before giving up on cal. Arbitrarily
+        // chosen value.
+        const TRYCNT: usize = 16;
+        let mut ctrl: C = self.read_reg()?;
+
+        // DC_ADDR := ADDR
+        ctrl.set_addr(addr);
+
+        // DC_START_CLBR := 1
+        ctrl.set_start_clbr(true);
+        self.write_reg(ctrl)?;
+        ctrl = self.read_reg()?;
+
+        // DC_START_CLBR := 0
+        ctrl.set_start_clbr(false);
+        self.write_reg(ctrl)?;
+
+        info!("Performing DC offset cal for module addr {:#02x}", addr);
+        for i in 0..TRYCNT {
+            debug!("DC CAl {:#02x} attempt {}/{}", addr, i + 1, TRYCNT);
+            // Wait fo 6.4 uS
+            thread::sleep(time::Duration::new(0, 6_400));
+            // Read DC_CLBR_DONE
+            let sts: S = self.read_reg()?;
+            // DC_CLBR_DONE == 1?
+            if !sts.clbr_done() {
+                // Yes => keep trying
+                continue;
+            }
+            // No =>
+            // Read DC_LOCK
+            // DC_LOCK != 0 or 7
+            if sts.lock() {
+                // Yes => finished
+                // info!("DC CAl {:#02x} success");
+                return Ok(());
+            }
+            // No => keep trying
+        }
+        Err(Error::Cal(CalError::TryCntLimReached(addr, TRYCNT)))
+    }
+
+    pub fn dc_cal(&self, module: DcCalMod) -> Result<()> {
+        use reg::*;
+        info!("Performing DC offset calibration for {:?}", module);
+        // Backup clk enable register and restore it after calibrating
+        // specified module
+        debug!("Backing up CLK EN value for {:?}", module);
+        let top09: Top0x09 = self.read_reg()?;
+        self.write_reg(module.set_clk(top09, true))?;
+
+        fn inner<N: Interface>(lms: &LMS6002<N>, module: DcCalMod) -> Result<()> {
+            match module {
+                DcCalMod::LpfTuning => lms.general_dc_cal::<Top0x01, Top0x03>(0)?,
+                DcCalMod::RxLpf(Some(chan)) => {
+                    lms.general_dc_cal::<RxLpfDacAdc0x51, RxLpfDacAdc0x53>(chan as u8)?
+                }
+                DcCalMod::RxLpf(None) => {
+                    lms.general_dc_cal::<RxLpfDacAdc0x51, RxLpfDacAdc0x53>(LpfDcCalChan::I as u8)?;
+                    lms.general_dc_cal::<RxLpfDacAdc0x51, RxLpfDacAdc0x53>(LpfDcCalChan::Q as u8)?;
+                }
+                DcCalMod::TxLpf(Some(chan)) => {
+                    lms.general_dc_cal::<TxLpf0x31, TxLpf0x33>(chan as u8)?
+                }
+                DcCalMod::TxLpf(None) => {
+                    lms.general_dc_cal::<TxLpf0x31, TxLpf0x33>(LpfDcCalChan::I as u8)?;
+                    lms.general_dc_cal::<TxLpf0x31, TxLpf0x33>(LpfDcCalChan::Q as u8)?;
+                }
+                DcCalMod::RxVga2(Some(chan)) => {
+                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(chan as u8)?
+                }
+                DcCalMod::RxVga2(None) => {
+                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(RxVga2DcCalChan::DcRef as u8)?;
+                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(RxVga2DcCalChan::FirstStageI as u8)?;
+                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(RxVga2DcCalChan::FirstStageQ as u8)?;
+                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(
+                        RxVga2DcCalChan::SecondStageI as u8,
+                    )?;
+                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(
+                        RxVga2DcCalChan::SecondStageQ as u8,
+                    )?;
+                }
+            }
+            Ok(())
+        };
+        let res = inner(self, module);
+
+        debug!("Restoring up CLK EN value for {:?}", module);
+        self.write_reg(top09)?;
+        res
     }
 }
