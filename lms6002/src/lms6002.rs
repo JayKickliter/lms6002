@@ -384,51 +384,82 @@ impl<I: Interface> LMS6002<I> {
     /// calibration subroutines. It is outlined in "LMS6002
     /// Programming and Calibration",
     /// [Sec. 4.1](https://wiki.myriadrf.org/LimeMicro:LMS6002D_Programming_and_Calibration#General_DC_Calibration_Procedure)
-    pub fn general_dc_cal<S, C>(&self, addr: u8) -> Result<()>
+    pub fn general_dc_cal<R, S, C>(&self, addr: u8) -> Result<u8>
     where
         C: reg::DcCalControlReg + reg::LmsReg,
         S: reg::DcCalStatusReg + reg::LmsReg,
+        R: reg::DcRegValReg + reg::LmsReg,
     {
-        // Max number tries before giving up on cal. Arbitrarily
-        // chosen value.
-        const TRYCNT: usize = 16;
-        let mut ctrl: C = self.read_reg()?;
+        fn inner<C, S, N>(lms: &LMS6002<N>, addr: u8) -> Result<()>
+        where
+            C: reg::DcCalControlReg + reg::LmsReg,
+            S: reg::DcCalStatusReg + reg::LmsReg,
+            N: Interface,
+        {
+            // Max number tries before giving up on cal. Arbitrarily
+            // chosen value.
+            const TRYCNT: usize = 10;
+            let mut ctrl: C = lms.read_reg()?;
 
-        // DC_ADDR := ADDR
-        ctrl.set_addr(addr);
+            // DC_ADDR := ADDR
+            ctrl.set_addr(addr);
 
-        // DC_START_CLBR := 1
-        ctrl.set_start_clbr(true);
-        self.write_reg(ctrl)?;
-        ctrl = self.read_reg()?;
+            // DC_START_CLBR := 1
+            ctrl.set_start_clbr(true);
+            lms.write_reg(ctrl)?;
+            ctrl = lms.read_reg()?;
 
-        // DC_START_CLBR := 0
-        ctrl.set_start_clbr(false);
-        self.write_reg(ctrl)?;
+            // DC_START_CLBR := 0
+            ctrl.set_start_clbr(false);
+            lms.write_reg(ctrl)?;
 
-        info!("Performing DC offset cal for module addr {:#02x}", addr);
-        for i in 0..TRYCNT {
-            debug!("DC CAl {:#02x} attempt {}/{}", addr, i + 1, TRYCNT);
-            // Wait fo 6.4 uS
-            thread::sleep(time::Duration::new(0, 6_400));
-            // Read DC_CLBR_DONE
-            let sts: S = self.read_reg()?;
-            // DC_CLBR_DONE == 1?
-            if !sts.clbr_done() {
-                // Yes => keep trying
-                continue;
+            info!("Performing DC offset cal for module at {:#02x}", addr);
+            for i in 0..TRYCNT {
+                debug!("DC CAL {:#02x} attempt {}/{}", addr, i + 1, TRYCNT);
+                // Wait fo 6.4 uS
+                thread::sleep(time::Duration::new(0, 6_400));
+
+                let sts: S = lms.read_reg()?;
+
+                // Check DC_CLBR_DONE
+                if !sts.clbr_done() {
+                    continue;
+                }
+
+                // Check DC_LOCK
+                if sts.lock() {
+                    debug!("DC CAl {:#02x}, got DC_LOCK", addr);
+                    break;
+                }
+                // Keep going
             }
-            // No =>
-            // Read DC_LOCK
-            // DC_LOCK != 0 or 7
-            if sts.lock() {
-                // Yes => finished
-                // info!("DC CAl {:#02x} success");
-                return Ok(());
-            }
-            // No => keep trying
+            Ok(())
         }
-        Err(Error::Cal(CalError::TryCntLimReached(addr, TRYCNT)))
+
+        // First try straight calibration routine. As long as
+        // `DC_REGVAL != 31`, we can trust that worked and can return.
+        let _ = inner::<C, S, I>(self, addr)?;
+        let dc_regval = self.read_reg::<R>()?.regval();
+        if dc_regval != 31 {
+            debug!("First calibration attempt succeeded");
+            return Ok(dc_regval);
+        }
+        warn!("First calibration attempt failed (`DC_REGVAL = 31`)");
+
+        // The first attempt didn't converge. This time we'll set
+        // DC_REGVAL to 0 and run the calibration routine again. If we
+        // succeed, success is indicated by a value other than 0 when
+        // we're done.
+        debug!("Trying calibration a second time with `DC_REGVAL = 0`");
+        self.rmw_reg(|reg: &mut R| reg.set_regval(0))?;
+        let _ = inner::<C, S, I>(self, addr)?;
+        let dc_regval = self.read_reg::<R>()?.regval();
+        if dc_regval != 0 {
+            return Ok(dc_regval);
+        }
+        error!("Second calibration attempt failed: `DC_REGVAL = 0`");
+
+        Err(Error::Cal)
     }
 
     pub fn dc_cal(&self, module: DcCalMod) -> Result<()> {
@@ -442,40 +473,54 @@ impl<I: Interface> LMS6002<I> {
 
         fn inner<N: Interface>(lms: &LMS6002<N>, module: DcCalMod) -> Result<()> {
             match module {
-                DcCalMod::LpfTuning => lms.general_dc_cal::<Top0x01, Top0x03>(0)?,
+                DcCalMod::LpfTuning => {
+                    lms.general_dc_cal::<Top0x00, Top0x01, Top0x03>(0)?;
+                }
                 DcCalMod::RxLpf(Some(chan)) => {
-                    lms.general_dc_cal::<RxLpfDacAdc0x51, RxLpfDacAdc0x53>(chan as u8)?
+                    lms.general_dc_cal::<RxLpfDacAdc0x50, RxLpfDacAdc0x51, RxLpfDacAdc0x53>(
+                        chan as u8,
+                    )?;
                 }
                 DcCalMod::RxLpf(None) => {
-                    lms.general_dc_cal::<RxLpfDacAdc0x51, RxLpfDacAdc0x53>(LpfDcCalChan::I as u8)?;
-                    lms.general_dc_cal::<RxLpfDacAdc0x51, RxLpfDacAdc0x53>(LpfDcCalChan::Q as u8)?;
+                    lms.general_dc_cal::<RxLpfDacAdc0x50, RxLpfDacAdc0x51, RxLpfDacAdc0x53>(
+                        LpfDcCalChan::I as u8,
+                    )?;
+                    lms.general_dc_cal::<RxLpfDacAdc0x50, RxLpfDacAdc0x51, RxLpfDacAdc0x53>(
+                        LpfDcCalChan::Q as u8,
+                    )?;
                 }
                 DcCalMod::TxLpf(Some(chan)) => {
-                    lms.general_dc_cal::<TxLpf0x31, TxLpf0x33>(chan as u8)?
+                    lms.general_dc_cal::<TxLpf0x30, TxLpf0x31, TxLpf0x33>(chan as u8)?;
                 }
                 DcCalMod::TxLpf(None) => {
-                    lms.general_dc_cal::<TxLpf0x31, TxLpf0x33>(LpfDcCalChan::I as u8)?;
-                    lms.general_dc_cal::<TxLpf0x31, TxLpf0x33>(LpfDcCalChan::Q as u8)?;
+                    lms.general_dc_cal::<TxLpf0x30, TxLpf0x31, TxLpf0x33>(LpfDcCalChan::I as u8)?;
+                    lms.general_dc_cal::<TxLpf0x30, TxLpf0x31, TxLpf0x33>(LpfDcCalChan::Q as u8)?;
                 }
                 DcCalMod::RxVga2(Some(chan)) => {
-                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(chan as u8)?
+                    lms.general_dc_cal::<RxVga0x60, RxVga0x61, RxVga0x63>(chan as u8)?;
                 }
                 DcCalMod::RxVga2(None) => {
-                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(RxVga2DcCalChan::DcRef as u8)?;
-                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(RxVga2DcCalChan::FirstStageI as u8)?;
-                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(RxVga2DcCalChan::FirstStageQ as u8)?;
-                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(
+                    lms.general_dc_cal::<RxVga0x60, RxVga0x61, RxVga0x63>(
+                        RxVga2DcCalChan::DcRef as u8,
+                    )?;
+                    lms.general_dc_cal::<RxVga0x60, RxVga0x61, RxVga0x63>(
+                        RxVga2DcCalChan::FirstStageI as u8,
+                    )?;
+                    lms.general_dc_cal::<RxVga0x60, RxVga0x61, RxVga0x63>(
+                        RxVga2DcCalChan::FirstStageQ as u8,
+                    )?;
+                    lms.general_dc_cal::<RxVga0x60, RxVga0x61, RxVga0x63>(
                         RxVga2DcCalChan::SecondStageI as u8,
                     )?;
-                    lms.general_dc_cal::<RxVga0x61, RxVga0x63>(
+                    lms.general_dc_cal::<RxVga0x60, RxVga0x61, RxVga0x63>(
                         RxVga2DcCalChan::SecondStageQ as u8,
                     )?;
                 }
             }
             Ok(())
-        };
-        let res = inner(self, module);
+        }
 
+        let res = inner(self, module);
         debug!("Restoring up CLK EN value for {:?}", module);
         self.write_reg(top09)?;
         res
