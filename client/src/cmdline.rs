@@ -34,7 +34,11 @@ impl_from_hex_dec_bin!(u8);
 #[derive(StructOpt, Debug)]
 pub struct Opts {
     #[structopt(
-        parse(from_os_str), short = "d", long = "spidev", env = "LMS_DEV", name = "SPIDEV"
+        parse(from_os_str),
+        short = "d",
+        long = "spidev",
+        env = "LMS_DEV",
+        name = "SPIDEV"
     )]
     /// Path to Spidev, e.g. `/dev/spidev1.0`
     pub dev: PathBuf,

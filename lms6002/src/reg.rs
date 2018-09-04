@@ -56,6 +56,48 @@ macro_rules! lmsreg {
     };
 }
 
+pub trait DcCalStatusReg {
+    fn lock(&self) -> bool;
+    fn clbr_done(&self) -> bool;
+}
+
+macro_rules! dc_cal_status_reg {
+    ($reg:tt) => {
+        impl DcCalStatusReg for $reg {
+            fn lock(&self) -> bool {
+                let val = self.dc_lock();
+                (val != 0b000) && (val != 0b111)
+            }
+
+            fn clbr_done(&self) -> bool {
+                // For some stupid reason, this field defines DONE as
+                // 0, and 1 as not DONE. Let's negate it and return a
+                // proper `bool`.
+                !self.dc_clbr_done()
+            }
+        }
+    };
+}
+
+pub trait DcCalControlReg {
+    fn set_start_clbr(&mut self, start: bool);
+    fn set_addr(&mut self, addr: u8);
+}
+
+macro_rules! dc_cal_control_reg {
+    ($reg:tt) => {
+        impl DcCalControlReg for $reg {
+            fn set_start_clbr(&mut self, start: bool) {
+                self.set_dc_start_clbr(start);
+            }
+
+            fn set_addr(&mut self, addr: u8) {
+                self.set_dc_addr(addr);
+            }
+        }
+    };
+}
+
 mod top {
     ////////////////////////////////////////////////////////////////////////
     // Top Level Registers                                                //
@@ -102,6 +144,7 @@ mod top {
         pub dc_ud, _: 0;
     }
     lmsreg!(Top0x01, 0x01);
+    dc_cal_status_reg!(Top0x01);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -140,6 +183,7 @@ mod top {
         pub dc_addr, set_dc_addr: 2, 0;
     }
     lmsreg!(Top0x03, 0x03);
+    dc_cal_control_reg!(Top0x03);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -828,6 +872,7 @@ mod txlpf {
         pub dc_ud, _: 0;
     }
     lmsreg!(TxLpf0x31, 0x31);
+    dc_cal_status_reg!(TxLpf0x31);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -866,6 +911,7 @@ mod txlpf {
         pub dc_addr, set_dc_addr: 2, 0;
     }
     lmsreg!(TxLpf0x33, 0x33);
+    dc_cal_control_reg!(TxLpf0x33);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -1298,6 +1344,7 @@ mod adcdac {
         pub dc_ud, _: 0;
     }
     lmsreg!(RxLpfDacAdc0x51, 0x51);
+    dc_cal_status_reg!(RxLpfDacAdc0x51);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -1336,6 +1383,7 @@ mod adcdac {
         pub dc_addr, set_dc_addr: 2, 0;
     }
     lmsreg!(RxLpfDacAdc0x53, 0x53);
+    dc_cal_control_reg!(RxLpfDacAdc0x53);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -1754,6 +1802,7 @@ mod rxvga2 {
         pub dc_ud, _: 0;
     }
     lmsreg!(RxVga0x61, 0x61);
+    dc_cal_status_reg!(RxVga0x61);
 
     bitfield!{
         #[derive(Clone, Copy)]
@@ -1796,6 +1845,7 @@ mod rxvga2 {
         pub dc_addr, set_dc_addr: 2, 0;
     }
     lmsreg!(RxVga0x63, 0x63);
+    dc_cal_control_reg!(RxVga0x63);
 
     bitfield!{
         #[derive(Clone, Copy)]
