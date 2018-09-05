@@ -475,7 +475,9 @@ impl<I: Interface> LMS6002<I> {
         fn inner<N: Interface>(lms: &LMS6002<N>, module: DcCalMod) -> Result<()> {
             match module {
                 DcCalMod::LpfTuning => {
-                    lms.general_dc_cal::<Top0x00, Top0x01, Top0x03>(0)?;
+                    let dccal = lms.general_dc_cal::<Top0x00, Top0x01, Top0x03>(0)?;
+                    lms.rmw_reg(|reg: &mut TxLpf0x35| reg.set_dco_daccal(dccal))?;
+                    lms.rmw_reg(|reg: &mut RxLpfDacAdc0x55| reg.set_dco_daccal(dccal))?;
                 }
                 DcCalMod::RxLpf(Some(chan)) => {
                     lms.general_dc_cal::<RxLpfDacAdc0x50, RxLpfDacAdc0x51, RxLpfDacAdc0x53>(
