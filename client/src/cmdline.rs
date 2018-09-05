@@ -133,12 +133,20 @@ pub enum RegCmd {
     },
     /// Write `val` to register at `addr`
     write {
-        #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
+        /// Address of destination register
+        #[structopt(
+            name = "ADDR",
+            parse(try_from_str = "FromHexDecBin::from_hex_dec_bin")
+        )]
         addr: u8,
-        /// Write <val> to range of bits in the target register, e.g. `7..3`
-        #[structopt(long = "range", name = "MSB..LSB")]
+        /// Write VAL to this range of bits in the destination, e.g. `7..3`
+        #[structopt(long = "range", name = "RANGE")]
         range: Option<BitRange>,
-        #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
+        /// Value to write to ADDR
+        #[structopt(
+            name = "VAL",
+            parse(try_from_str = "FromHexDecBin::from_hex_dec_bin")
+        )]
         val: u8,
     },
 }
