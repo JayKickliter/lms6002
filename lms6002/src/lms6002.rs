@@ -438,6 +438,7 @@ impl<I: Interface> LMS6002<I> {
 
         // First try straight calibration routine. As long as
         // `DC_REGVAL != 31`, we can trust that worked and can return.
+        self.rmw_reg(|reg: &mut R| reg.set_regval(31))?;
         let _ = inner::<C, S, I>(self, addr)?;
         let dc_regval = self.read_reg::<R>()?.regval();
         if dc_regval != 31 {
