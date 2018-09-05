@@ -8,6 +8,7 @@ extern crate log;
 extern crate spidev;
 #[macro_use]
 extern crate structopt;
+extern crate bitfield;
 mod cmdline;
 mod error;
 mod interface;
@@ -21,8 +22,31 @@ fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) -> error:
             let val = lms.read(addr)?;
             println!("{:#02x}: {:#?}", addr, lms6002::reg::into_debug(addr, val)?);
         }
-        RegCmd::write { addr, val } => {
+        RegCmd::write {
+            addr,
+            range: None,
+            val,
+        } => {
             lms.write(addr, val)?;
+        }
+        RegCmd::write {
+            addr,
+            range: Some(BitRange(h, l)),
+            val,
+        } => {
+            let mut regval = lms.read(addr)?;
+            println!(
+                "{:#02x}: -> {:#?}",
+                addr,
+                lms6002::reg::into_debug(addr, regval)?
+            );
+            ::bitfield::BitRange::set_bit_range(&mut regval, h, l, val);
+            lms.write(addr, regval)?;
+            println!(
+                "{:#02x}: <- {:#?}",
+                addr,
+                lms6002::reg::into_debug(addr, regval)?
+            );
         }
     }
     Ok(())

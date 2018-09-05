@@ -1,6 +1,7 @@
 #![allow(non_camel_case_types)]
 
 use std::path::PathBuf;
+use std::str::FromStr;
 
 /// Will attempt to parse an integer from a hex, binary, or decimal
 /// string based on the leading two characters:
@@ -84,6 +85,44 @@ pub enum TRxCmd {
     },
 }
 
+/// Represents a range of bits in a `u8` register.
+#[derive(Debug, Clone, Copy)]
+pub struct BitRange(pub usize, pub usize);
+
+impl FromStr for BitRange {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // As an example, we are trying to turn, `"7..3"` into
+        // `BitRange(7,3)`.
+
+        let err_str = "Bit range must a digit (high bit index), two dots, then another digit (low bit index): '7..3'";
+
+        // There will always be 4 characters in this parameter.
+        if s.len() < 4 {
+            return Err(err_str.to_owned());
+        }
+
+        // The middle two characters will always be `".."`.
+        if &s[1..3] != ".." {
+            return Err(err_str.to_owned());
+        }
+
+        // The first character is always a single decimal digit.
+        let high_bit_idx = { usize::from_str(&s[0..1]).or(Err(err_str.to_owned()))? };
+
+        // The fourth character is always a single decimal digit.
+        let low_bit_idx = { usize::from_str(&s[3..4]).or(Err(err_str.to_owned()))? };
+
+        // The high bit index must be `>=` the low bit index.
+        if high_bit_idx < low_bit_idx {
+            return Err(err_str.to_owned());
+        }
+
+        Ok(BitRange(high_bit_idx, low_bit_idx))
+    }
+}
+
 /// Low-level register command
 #[derive(Debug, StructOpt)]
 pub enum RegCmd {
@@ -96,6 +135,9 @@ pub enum RegCmd {
     write {
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
         addr: u8,
+        /// Write <val> to range of bits in the target register, e.g. `7..3`
+        #[structopt(long = "range", name = "MSB..LSB")]
+        range: Option<BitRange>,
         #[structopt(parse(try_from_str = "FromHexDecBin::from_hex_dec_bin"))]
         val: u8,
     },
