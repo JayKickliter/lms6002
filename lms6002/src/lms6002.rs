@@ -504,6 +504,9 @@ impl<I: Interface> LMS6002<I> {
         // specified module
         let top09 = self.backup::<Top0x09>()?;
 
+        // Enable relevant clock for this module.
+        self.write_reg(module.set_clk(top09.reg, true))?;
+
         fn inner<N: Interface>(lms: &LMS6002<N>, module: DcCalMod) -> Result<()> {
             match module {
                 DcCalMod::LpfTuning => {
