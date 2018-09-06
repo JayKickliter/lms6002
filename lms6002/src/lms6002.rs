@@ -5,16 +5,16 @@ use reg;
 use std::thread;
 use std::time;
 
-struct RegBackup<'a, R: reg::LmsReg, I: 'a + Interface> {
+struct RegStash<'a, R: reg::LmsReg, I: 'a + Interface> {
     reg: R,
     lms: &'a LMS6002<I>,
 }
 
-impl<'a, R: reg::LmsReg, I: Interface> RegBackup<'a, R, I> {
+impl<'a, R: reg::LmsReg, I: Interface> RegStash<'a, R, I> {
     pub fn new(lms: &'a LMS6002<I>) -> Result<Self> {
         let reg = lms.read_reg()?;
         debug!("Backed up {:?}", reg);
-        Ok(RegBackup { reg: reg, lms })
+        Ok(RegStash { reg: reg, lms })
     }
 
     pub fn restore(&self) {
@@ -25,7 +25,7 @@ impl<'a, R: reg::LmsReg, I: Interface> RegBackup<'a, R, I> {
     }
 }
 
-impl<'a, R: reg::LmsReg, I: Interface> Drop for RegBackup<'a, R, I> {
+impl<'a, R: reg::LmsReg, I: Interface> Drop for RegStash<'a, R, I> {
     fn drop(&mut self) {
         self.restore();
     }
@@ -115,11 +115,11 @@ impl<I: Interface> LMS6002<I> {
         op(&mut self.iface)
     }
 
-    fn backup<R>(&self) -> Result<RegBackup<R, I>>
+    fn stash<R>(&self) -> Result<RegStash<R, I>>
     where
         R: reg::LmsReg,
     {
-        RegBackup::new(self)
+        RegStash::new(self)
     }
 }
 
@@ -499,9 +499,9 @@ impl<I: Interface> LMS6002<I> {
     pub fn dc_cal(&self, module: DcCalMod) -> Result<()> {
         use reg::*;
         info!("Performing DC offset calibration for {:?}", module);
-        // Backup clk enable register and restore it after calibrating
+        // Stash clk enable register and restore it after calibrating
         // specified module
-        let top09 = self.backup::<Top0x09>()?;
+        let top09 = self.stash::<Top0x09>()?;
 
         // Enable relevant clock for this module.
         self.write_reg(module.set_clk(top09.reg, true))?;
