@@ -579,13 +579,11 @@ impl<I: Interface> LMS6002<I> {
     ///
     /// **NOTE**: `gain` must be a multiple of 3 and <= 60; errors
     /// otherwise.
-    pub fn set_rxvga2_gain(&self, gain: u32) -> Result<u32> {
+    pub fn set_rxvga2_gain(&self, gain: u32) -> Result<()> {
         let field = algo::rxga2_gain_to_field(gain)?;
-        let mut old_field = 0;
         self.rmw_reg(|reg: &mut reg::RxVga0x65| {
-            old_field = reg.vga2gain();
             reg.set_vga2gain(field);
         })?;
-        algo::rxga2_gain_from_field(old_field)
+        Ok(())
     }
 }
