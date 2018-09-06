@@ -5,6 +5,33 @@ use reg;
 use std::thread;
 use std::time;
 
+struct RegBackup<'a, R: reg::LmsReg, I: 'a + Interface> {
+    reg: R,
+    lms: &'a LMS6002<I>,
+}
+
+impl<'a, R: reg::LmsReg, I: Interface> RegBackup<'a, R, I> {
+    pub fn new(lms: &'a LMS6002<I>) -> Result<Self> {
+        Ok(RegBackup {
+            reg: lms.read_reg()?,
+            lms: lms,
+        })
+    }
+
+    pub fn restore(&self) {
+        match self.lms.write_reg(self.reg) {
+            Ok(()) => debug!("Restoring {:?}", self.reg),
+            Err(e) => error!("Could not restore register: {}", e),
+        }
+    }
+}
+
+impl<'a, R: reg::LmsReg, I: Interface> Drop for RegBackup<'a, R, I> {
+    fn drop(&mut self) {
+        self.restore();
+    }
+}
+
 /// A high-level interface for configuring and controlling an LMS6002.
 #[derive(Debug)]
 pub struct LMS6002<I> {
@@ -87,6 +114,13 @@ impl<I: Interface> LMS6002<I> {
         F: FnOnce(&mut I) -> R,
     {
         op(&mut self.iface)
+    }
+
+    fn backup<R>(&self) -> Result<RegBackup<R, I>>
+    where
+        R: reg::LmsReg,
+    {
+        RegBackup::new(self)
     }
 }
 
@@ -468,9 +502,7 @@ impl<I: Interface> LMS6002<I> {
         info!("Performing DC offset calibration for {:?}", module);
         // Backup clk enable register and restore it after calibrating
         // specified module
-        debug!("Backing up CLK EN value for {:?}", module);
-        let top09: Top0x09 = self.read_reg()?;
-        self.write_reg(module.set_clk(top09, true))?;
+        let top09 = self.backup::<Top0x09>()?;
 
         fn inner<N: Interface>(lms: &LMS6002<N>, module: DcCalMod) -> Result<()> {
             match module {
@@ -524,8 +556,6 @@ impl<I: Interface> LMS6002<I> {
         }
 
         let res = inner(self, module);
-        debug!("Restoring up CLK EN value for {:?}", module);
-        self.write_reg(top09)?;
         res
     }
 }
