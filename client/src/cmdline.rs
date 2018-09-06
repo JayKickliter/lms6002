@@ -71,6 +71,9 @@ pub enum Cmd {
 
     /// Configure RX VGA2
     rxvga2(RxVga2Cmd),
+
+    /// Configure RX Low Noise Amplifier
+    rxlna(RxLnaCmd),
 }
 
 /// High-level commands specific to Tx/Rx path
@@ -175,5 +178,29 @@ pub enum RxVga2Cmd {
         #[structopt(long = "set", name = "dB")]
         /// Set RXVGA2's to value in [0,3,6,9,...,60]
         set: Option<u32>,
+    },
+}
+
+#[derive(Debug)]
+pub struct RxLnaGain(pub ::lms6002::RxLnaGain);
+
+impl FromStr for RxLnaGain {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "bypass" => RxLnaGain(::lms6002::RxLnaGain::Bypass),
+            "mid" => RxLnaGain(::lms6002::RxLnaGain::Mid),
+            "max" => RxLnaGain(::lms6002::RxLnaGain::Max),
+            _ => return Err("Must be one of ['bypass', 'mid', 'max']".to_owned()),
+        })
+    }
+}
+
+#[derive(Debug, StructOpt)]
+pub enum RxLnaCmd {
+    gain {
+        #[structopt(long = "set", name = "MODE")]
+        /// Set RXLNA gain, where MODE ∈ {'bypass', 'mid', 'max'}
+        set: Option<RxLnaGain>,
     },
 }

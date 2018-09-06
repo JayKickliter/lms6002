@@ -14,7 +14,7 @@ impl<'a, R: reg::LmsReg, I: Interface> RegStash<'a, R, I> {
     pub fn new(lms: &'a LMS6002<I>) -> Result<Self> {
         let reg = lms.read_reg()?;
         debug!("Backed up {:?}", reg);
-        Ok(RegStash { reg: reg, lms })
+        Ok(RegStash { reg, lms })
     }
 
     pub fn restore(&self) {
@@ -570,6 +570,25 @@ impl<I: Interface> LMS6002<I> {
     }
 }
 
+#[repr(u8)]
+#[derive(Debug, Clone, Copy)]
+pub enum RxLnaGain {
+    Bypass = 0b01,
+    Mid = 0b10,
+    Max = 0b11,
+}
+
+impl ::std::fmt::Display for RxLnaGain {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        let s = match *self {
+            RxLnaGain::Bypass => "bypass",
+            RxLnaGain::Mid => "mid",
+            RxLnaGain::Max => "max",
+        };
+        write!(f, "{}", s)
+    }
+}
+
 impl<I: Interface> LMS6002<I> {
     /// Returns RXVGA2's gain, in dB.
     pub fn rxvga2_gain(&self) -> Result<u32> {
@@ -586,5 +605,21 @@ impl<I: Interface> LMS6002<I> {
             reg.set_vga2gain(field);
         })?;
         Ok(())
+    }
+
+    /// Returns current RX low-noise-aplifier gain.
+    pub fn rxlna_gain(&self) -> Result<RxLnaGain> {
+        Ok(match self.read_reg::<reg::RxFe0x75>()?.g_lna_rxfe() {
+            0b01 => RxLnaGain::Bypass,
+            0b10 => RxLnaGain::Mid,
+            0b11 => RxLnaGain::Max,
+            _ => return Err(Error::Range),
+        })
+    }
+
+    /// Sets RX low-noise-aplifier gain.
+    pub fn set_rxlna_gain(&self, gain: RxLnaGain) -> Result<()> {
+        info!("Setting LNA gain to {}", gain);
+        self.rmw_reg(|reg: &mut reg::RxFe0x75| reg.set_g_lna_rxfe(gain as u8))
     }
 }

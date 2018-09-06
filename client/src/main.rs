@@ -62,6 +62,16 @@ fn rxvga2_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RxVga2Cmd) -> 
     Ok(())
 }
 
+fn rxlna_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RxLnaCmd) -> error::Result {
+    match *cmd {
+        RxLnaCmd::gain { set: None } => println!("{}", lms.rxlna_gain()?),
+        RxLnaCmd::gain {
+            set: Some(RxLnaGain(gain)),
+        } => lms.set_rxlna_gain(gain)?,
+    };
+    Ok(())
+}
+
 fn try_main(opts: Opts) -> error::Result {
     use lms6002::{DcCalMod, Path};
     let iface = interface::Interface::open(opts.dev)?;
@@ -91,6 +101,7 @@ fn try_main(opts: Opts) -> error::Result {
             CalCmd::rxvga2 => lms.dc_cal(DcCalMod::RxVga2(None))?,
         },
         Cmd::rxvga2(cmd) => rxvga2_cmd(&lms, &cmd)?,
+        Cmd::rxlna(cmd) => rxlna_cmd(&lms, &cmd)?,
     };
     Ok(())
 }
