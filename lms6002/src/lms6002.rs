@@ -534,9 +534,17 @@ impl<I: Interface> LMS6002<I> {
                     lms.general_dc_cal::<TxLpf0x30, TxLpf0x31, TxLpf0x33>(LpfDcCalChan::Q as u8)?;
                 }
                 DcCalMod::RxVga2(Some(chan)) => {
+                    // Stash current gain and temporarily set it to 30 dB
+                    let _ = lms.stash::<RxVga0x65>()?;
+                    lms.set_rxvga2_gain(30)?;
+
                     lms.general_dc_cal::<RxVga0x60, RxVga0x61, RxVga0x63>(chan as u8)?;
                 }
                 DcCalMod::RxVga2(None) => {
+                    // Stash current gain and temporarily set it to 30 dB
+                    let _ = lms.stash::<RxVga0x65>()?;
+                    lms.set_rxvga2_gain(30)?;
+
                     lms.general_dc_cal::<RxVga0x60, RxVga0x61, RxVga0x63>(
                         RxVga2DcCalChan::DcRef as u8,
                     )?;
