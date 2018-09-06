@@ -14,7 +14,7 @@ impl<'a, R: reg::LmsReg, I: Interface> RegBackup<'a, R, I> {
     pub fn new(lms: &'a LMS6002<I>) -> Result<Self> {
         Ok(RegBackup {
             reg: lms.read_reg()?,
-            lms: lms,
+            lms,
         })
     }
 
@@ -558,8 +558,7 @@ impl<I: Interface> LMS6002<I> {
             Ok(())
         }
 
-        let res = inner(self, module);
-        res
+        inner(self, module)
     }
 }
 
