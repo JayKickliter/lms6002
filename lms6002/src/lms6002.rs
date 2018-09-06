@@ -504,6 +504,7 @@ impl<I: Interface> LMS6002<I> {
         let top09 = self.stash::<Top0x09>()?;
 
         // Enable relevant clock for this module.
+        debug!("Temporarily enabling clk for {:?}", module);
         self.write_reg(module.set_clk(top09.reg, true))?;
 
         fn inner<N: Interface>(lms: &LMS6002<N>, module: DcCalMod) -> Result<()> {
