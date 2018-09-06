@@ -133,3 +133,40 @@ fn test_bwc_from_bw() {
         assert_eq!(Ok(*regval), bwc_from_bw(*freq));
     }
 }
+
+pub fn rxga2_gain_from_field(field: u8) -> Result<u32> {
+    debug_assert!(field <= 0b10100);
+    if field > 0b10100 {
+        Err(Error::Range)
+    } else {
+        Ok(u32::from(field) * 3)
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_rxga2_gain_from_field() {
+    assert_eq!(rxga2_gain_from_field(0b00000), Ok(0));
+    assert_eq!(rxga2_gain_from_field(0b00001), Ok(3));
+    assert_eq!(rxga2_gain_from_field(0b01001), Ok(27));
+    assert_eq!(rxga2_gain_from_field(0b01010), Ok(30));
+    assert_eq!(rxga2_gain_from_field(0b10100), Ok(60));
+}
+
+pub fn rxga2_gain_to_field(gain: u32) -> Result<u8> {
+    if gain <= 60 && gain % 3 == 0 {
+        Ok((gain / 3) as u8)
+    } else {
+        Err(Error::Range)
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_rxga2_gain_to_field() {
+    assert_eq!(rxga2_gain_to_field(0), Ok(0b00000));
+    assert_eq!(rxga2_gain_to_field(3), Ok(0b00001));
+    assert_eq!(rxga2_gain_to_field(27), Ok(0b01001));
+    assert_eq!(rxga2_gain_to_field(30), Ok(0b01010));
+    assert_eq!(rxga2_gain_to_field(60), Ok(0b10100));
+}

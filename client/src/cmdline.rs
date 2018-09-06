@@ -68,6 +68,9 @@ pub enum Cmd {
 
     /// Calibration
     cal(CalCmd),
+
+    /// Configure RX VGA2
+    rxvga2(RxVga2Cmd),
 }
 
 /// High-level commands specific to Tx/Rx path
@@ -109,10 +112,10 @@ impl FromStr for BitRange {
         }
 
         // The first character is always a single decimal digit.
-        let high_bit_idx = { usize::from_str(&s[0..1]).or(Err(err_str.to_owned()))? };
+        let high_bit_idx = { usize::from_str(&s[0..1]).or_else(|_| Err(err_str.to_owned()))? };
 
         // The fourth character is always a single decimal digit.
-        let low_bit_idx = { usize::from_str(&s[3..4]).or(Err(err_str.to_owned()))? };
+        let low_bit_idx = { usize::from_str(&s[3..4]).or_else(|_| Err(err_str.to_owned()))? };
 
         // The high bit index must be `>=` the low bit index.
         if high_bit_idx < low_bit_idx {
@@ -164,4 +167,13 @@ pub enum CalCmd {
     rxlpf,
     txlpf,
     rxvga2,
+}
+
+#[derive(Debug, StructOpt)]
+pub enum RxVga2Cmd {
+    gain {
+        #[structopt(long = "set", name = "dB")]
+        /// Set RXVGA2's to value in [0,3,6,9,...,60]
+        set: Option<u32>,
+    },
 }
