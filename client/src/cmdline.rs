@@ -38,7 +38,7 @@ pub struct Opts {
         parse(from_os_str),
         short = "d",
         long = "spidev",
-        env = "LMS_DEV",
+        env = "LMSDEV",
         name = "SPIDEV"
     )]
     /// Path to Spidev, e.g. `/dev/spidev1.0`

@@ -96,7 +96,7 @@ fn try_main(opts: Opts) -> error::Result {
 }
 
 fn main() {
-    env_logger::init();
+    env_logger::Builder::from_env("LMSLOG").init();
     let opts = Opts::from_args();
     match try_main(opts) {
         Ok(_) => process::exit(0),
