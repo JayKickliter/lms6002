@@ -12,10 +12,9 @@ struct RegBackup<'a, R: reg::LmsReg, I: 'a + Interface> {
 
 impl<'a, R: reg::LmsReg, I: Interface> RegBackup<'a, R, I> {
     pub fn new(lms: &'a LMS6002<I>) -> Result<Self> {
-        Ok(RegBackup {
-            reg: lms.read_reg()?,
-            lms,
-        })
+        let reg = lms.read_reg()?;
+        debug!("Backed up {:?}", reg);
+        Ok(RegBackup { reg: reg, lms })
     }
 
     pub fn restore(&self) {
