@@ -5,6 +5,11 @@ use reg;
 use std::thread;
 use std::time;
 
+fn sleep_us(micros: f32) {
+    trace!("Sleeping for {} μs", micros);
+    thread::sleep(time::Duration::new(0, (micros * 1000_f32) as u32));
+}
+
 struct RegStash<'a, R: reg::LmsReg, I: 'a + Interface> {
     reg: R,
     lms: &'a LMS6002<I>,
@@ -449,8 +454,8 @@ impl<I: Interface> LMS6002<I> {
             info!("Performing DC offset cal for module at {:#02x}", addr);
             for i in 0..TRYCNT {
                 debug!("DC CAL {:#02x} attempt {}/{}", addr, i + 1, TRYCNT);
-                // Wait fo 6.4 uS
-                thread::sleep(time::Duration::new(0, 6_400));
+                // Wait for 6.4 uS
+                sleep_us(6.4);
 
                 let sts: S = lms.read_reg()?;
 
