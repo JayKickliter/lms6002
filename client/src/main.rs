@@ -16,7 +16,9 @@ use cmdline::*;
 use std::process;
 use structopt::StructOpt;
 
-fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) -> error::Result {
+type LMS = lms6002::LMS6002<interface::Interface>;
+
+fn reg_cmd(lms: &LMS, cmd: &RegCmd) -> error::Result {
     match *cmd {
         RegCmd::read { addr } => {
             let val = lms.read(addr)?;
@@ -52,7 +54,7 @@ fn reg_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RegCmd) -> error:
     Ok(())
 }
 
-fn rxvga2_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RxVga2Cmd) -> error::Result {
+fn rxvga2_cmd(lms: &LMS, cmd: &RxVga2Cmd) -> error::Result {
     match *cmd {
         RxVga2Cmd::gain { set: None } => println!("{}", lms.rxvga2_gain()?),
         RxVga2Cmd::gain { set: Some(gain) } => {
@@ -62,7 +64,7 @@ fn rxvga2_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RxVga2Cmd) -> 
     Ok(())
 }
 
-fn rxlna_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RxLnaCmd) -> error::Result {
+fn rxlna_cmd(lms: &LMS, cmd: &RxLnaCmd) -> error::Result {
     match *cmd {
         RxLnaCmd::gain { set: None } => println!("{}", lms.rxlna_gain()?),
         RxLnaCmd::gain {
@@ -74,8 +76,7 @@ fn rxlna_cmd(lms: &lms6002::LMS6002<interface::Interface>, cmd: &RxLnaCmd) -> er
 
 fn try_main(opts: Opts) -> error::Result {
     use lms6002::{DcCalMod, Path};
-    let iface = interface::Interface::open(opts.dev)?;
-    let lms = lms6002::LMS6002::new(iface, 40_000_000);
+    let lms = LMS::new(interface::Interface::open(opts.dev)?, 40_000_000);
     match opts.cmd {
         Cmd::reg(cmd) => reg_cmd(&lms, &cmd)?,
         Cmd::rxpll(TRxCmd::enable) => lms.trx_enable(Path::RX, true)?,
