@@ -74,10 +74,15 @@ fn rxlna_cmd(lms: &LMS, cmd: &RxLnaCmd) -> error::Result {
     Ok(())
 }
 
+fn reset_cmd(lms: &LMS) -> error::Result {
+    Ok(lms.reset()?)
+}
+
 fn try_main(opts: Opts) -> error::Result {
     use lms6002::{DcCalMod, Path};
     let lms = LMS::new(interface::Interface::open(opts.dev)?, 40_000_000);
     match opts.cmd {
+        Cmd::reset => reset_cmd(&lms)?,
         Cmd::reg(cmd) => reg_cmd(&lms, &cmd)?,
         Cmd::rxpll(TRxCmd::enable) => lms.trx_enable(Path::RX, true)?,
         Cmd::txpll(TRxCmd::enable) => lms.trx_enable(Path::TX, true)?,

@@ -51,6 +51,9 @@ pub struct Opts {
 /// Top-level commands.
 #[derive(Debug, StructOpt)]
 pub enum Cmd {
+    /// Soft-reset LMS6002 to its default state
+    reset,
+
     /// Configure RX PLL
     rxpll(TRxCmd),
 

@@ -140,6 +140,22 @@ impl<I: Interface> LMS6002<I> {
         Self { iface, clk }
     }
 
+    // Soft-resets the device.
+    pub fn reset(&self) -> Result<()> {
+        self.rmw_reg(|reg: &mut reg::Top0x05| reg.set_sreset(false))?;
+        // The docs do not mention (why would they) if any delay is
+        // necessary, so this may be:
+        //
+        // - unnecessary
+        // - too short
+        // - too long
+        //
+        // Who knows.
+        sleep_us(25.0);
+        self.rmw_reg(|reg: &mut reg::Top0x05| reg.set_sreset(true))?;
+        Ok(())
+    }
+
     /// [En,Dis]ables the TX or RX path.
     pub fn trx_enable(&self, path: Path, enable: bool) -> Result<()> {
         info!(
