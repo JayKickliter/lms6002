@@ -235,6 +235,7 @@ impl<I: Interface> LMS6002<I> {
                     lms.rmw_reg(|r: &mut PllReg<Pll0x09, M>| {
                         r.0.set_vcocap(0);
                     })?;
+                    sleep_us(50.0);
                     lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune()
                 };
 
@@ -243,6 +244,7 @@ impl<I: Interface> LMS6002<I> {
                     lms.rmw_reg(|r: &mut PllReg<Pll0x09, M>| {
                         r.0.set_vcocap(63);
                     })?;
+                    sleep_us(50.0);
                     lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune()
                 };
 
@@ -271,9 +273,8 @@ impl<I: Interface> LMS6002<I> {
                 Ok(())
             };
             let read_vtune = || -> Result<VTune> {
-                let vtune = lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune();
-                // TODO: review if this is necessary.
                 sleep_us(50.0);
+                let vtune = lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune();
                 Ok(vtune)
             };
 
