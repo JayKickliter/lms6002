@@ -272,6 +272,8 @@ impl<I: Interface> LMS6002<I> {
             };
             let read_vtune = || -> Result<VTune> {
                 let vtune = lms.read_reg::<PllReg<Pll0x0A, M>>()?.0.vtune();
+                // TODO: review if this is necessary.
+                sleep_us(50.0);
                 Ok(vtune)
             };
 
@@ -285,12 +287,18 @@ impl<I: Interface> LMS6002<I> {
             for capval in 0..64 {
                 set_vcocap(capval)?;
                 match (capval_low, capval_high, read_vtune()?) {
-                    (None, None, High) => (),
+                    (None, None, High) => {
+                        // TODO: review if this is necessary.
+                        sleep_us(10.0)
+                    }
                     t @ (None, None, InRange) => {
                         debug!("VTune transitioned to {:?}", t.2);
                         capval_low = Some(capval);
                     }
-                    (Some(_), None, InRange) => continue,
+                    (Some(_), None, InRange) => {
+                        // TODO: review if this is necessary.
+                        sleep_us(10.0)
+                    }
                     t @ (Some(_), None, Low) => {
                         debug!("VTune transitioned to {:?}", t.2);
                         capval_high = Some(capval - 1);
