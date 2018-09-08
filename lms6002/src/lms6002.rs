@@ -24,7 +24,7 @@ impl<'a, R: reg::LmsReg, I: Interface> RegStash<'a, R, I> {
 
     pub fn restore(&self) {
         match self.lms.write_reg(self.reg) {
-            Ok(()) => debug!("Restoring {:?}", self.reg),
+            Ok(()) => debug!("Restored {:?}", self.reg),
             Err(e) => error!("Could not restore register: {}", e),
         }
     }
